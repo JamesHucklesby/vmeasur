@@ -98,30 +98,38 @@ threshold_image <- function(file_path, threshold)
 #' @export
 #'
 #' @examples
-threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = '\\\\files.auckland.ac.nz\\research\\ressci202000061-PROM-study\\Version 5\\image826.avi',radians = 0.217604550320612,xlength = 60,ylength = 243,xstart = 696,ystart = 323)
+threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = '\\\\files.auckland.ac.nz\\research\\ressci202000061-PROM-study\\Version 5\\image826.avi',radians = 0.217604550320612,xlength = 60,ylength = 242,xstart = 696,ystart = 323, image_list = NULL)
 {
-
-  ylength = ylength + ylength %% 2
-  xlength = xlength + xlength %% 2
 
 
 directory = scratch_dir()
-video_name = paste(basename(file_path_sans_ext(video_path)),"_",roi_name, sep = "")
-
 video_folder = dirname(video_path)
 
-temp_path = paste(directory, "/", video_name, sep = "")
-dir.create(temp_path)
+video_name = paste(basename(file_path_sans_ext(video_path)),"_",roi_name, sep = "")
 
-filter_string = paste("rotate = '",radians,":out_w=rotw(",radians,"):out_h=roth(",radians,"):c = red',",
-                      "crop=",xlength,":",ylength,":",xstart,":",ystart,"",
-                      sep = "")
 
-av_encode_video(video_path, paste(temp_path, "/test1w%03d.png", sep = ""), vfilter = filter_string, codec = "png")
 
-# av_video_images(paste(temp_path, "/croprotate.avi", sep = ""), destdir = temp_path, format = "png", vfilter = filter_string)
+if(!is.null(image_list))
+{
+  file_list = image_list
+  temp_path = dirname(file_list[1])
+}
+else
+{
+  temp_path = paste(directory, "/", video_name, sep = "")
+  dir.create(temp_path)
 
-file_list = list.files(temp_path, full.names = TRUE, pattern = "\\.png$")
+
+  filter_string = paste("rotate = '",radians,":out_w=rotw(",radians,"):out_h=roth(",radians,"):c = red',",
+                        "crop=",xlength,":",ylength,":",xstart,":",ystart,"",
+                        sep = "")
+
+  av_encode_video(video_path, paste(temp_path, "/test1w%03d.png", sep = ""), vfilter = filter_string, codec = "png")
+
+  # av_video_images(paste(temp_path, "/croprotate.avi", sep = ""), destdir = temp_path, format = "png", vfilter = filter_string)
+
+  file_list = list.files(temp_path, full.names = TRUE, pattern = "\\.png$")
+}
 
 cl <- makeCluster(16)
 registerDoSNOW(cl)
@@ -138,12 +146,12 @@ result <- foreach(i = file_list, .combine = rbind,
     library(dplyr)
     library(tools)
 
-    processed_image = threshold_image(i, threshold)
+    processed_image = vmeasur::threshold_image(i, threshold)
 
     file_path = i
 
-    save_image_path = paste(file_path_sans_ext(file_path), "_overlaid.png", sep = "")
-    save_csv_path = paste(file_path_sans_ext(file_path), "_overlaid.csv", sep = "")
+    save_image_path = paste(file_path_sans_ext(i), "_overlaid.png", sep = "")
+    save_csv_path = paste(file_path_sans_ext(i), "_overlaid.csv", sep = "")
 
     save.image(processed_image[[1]], save_image_path)
     write.csv(processed_image[[2]], save_csv_path)

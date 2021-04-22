@@ -63,8 +63,10 @@ make_matrix = function(output_list, width = 2)
 
   for(i in 1:total_images)
   {
+    currentimg = output_list[i][[1]]
+    currentimg = pad(currentimg, 5, "xy")
 
-    current_col = ci(current_col, output_list[i])
+    current_col = ci(current_col, currentimg)
     current_width = current_width + 1
 
     if(width == current_width || i == total_images)
@@ -103,7 +105,7 @@ scratch_dir = function(set = NULL)
     options("quantifyvessel-scratch_dir"= set)
   }
 
-  if(is.null(options("quantifyvessel-scratch_dir")))
+  if(is.null(unlist(options("quantifyvessel-scratch_dir"))))
   {
     return(tempdir())
   }

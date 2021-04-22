@@ -1,3 +1,7 @@
+
+
+
+
 #' Title
 #'
 #' @return
@@ -12,12 +16,10 @@
 select_roi = function()
 {
 
-roi_name = winDialogString("Enter ROI name", "")
 
 video_path = file.choose()
 video_folder = dirname(video_path)
 video_name = basename(file_path_sans_ext(video_path))
-
 
 workingdir = paste(scratch_dir(),"/",hash(video_name), sep = "")
 
@@ -25,9 +27,13 @@ av_video_images(video_path, format = "png", destdir = workingdir, fps = 1)
 
 raw = load.image(paste(workingdir,"/image_000001.png", sep = ""))
 
-latch = TRUE
+latchcrop = TRUE
+latchthresh = TRUE
 
-while(latch)
+while(latchcrop || latchthresh){
+
+
+while(latchcrop)
 {
 
 angleselect = grabLine(raw, output = "coord")
@@ -39,36 +45,36 @@ rotated = imrotate(raw, rotation)
 
 areaselect = grabRect(rotated, output = "coord")
 
-xstart = min(areaselect["x1"],areaselect["x0"]) - width
-ystart = min(areaselect["y1"],areaselect["y0"]) - width
+xstart = min(areaselect["x1"],areaselect["x0"])
+ystart = min(areaselect["y1"],areaselect["y0"])
 
 ylength = max(areaselect["y1"],areaselect["y0"])-ystart
 xlength = max(areaselect["x1"],areaselect["x0"])-xstart
+
+ylength = ylength + ylength %% 2
+xlength = xlength + xlength %% 2
 
 cropped = crop_dims(rotated, xstart, ystart, xlength, ylength)
 
 plot(cropped)
 
-cat("\nEnter y to accept, or n to go again, or c to cancel")
-again <- scan(what=character(),nmax=1,quiet=TRUE)
+status = menu(c("Change", "Accept", "Exit"))
 
-if(again =="y")
+if(status == 3)
 {
-  latch = FALSE
-}
-
-if(again =="c")
+  stop("Function exited")
+} else if(status == 2)
 {
-  return(FALSE)
+  latchcrop = FALSE
+  latchthresh = TRUE
 }
 
+
 }
 
 
-# draw_rect(rotated,xstart,ystart,xstart+xlength, ystart+ylength,color="green",opacity=0.3) %>% plot()
 
-
-filter_string = paste("framestep = 100, rotate = '",radians,":out_w=rotw(",radians,"):out_h=roth(",radians,"):c = red',",
+filter_string = paste("rotate = '",radians,":out_w=rotw(",radians,"):out_h=roth(",radians,"):c = red',",
                       "crop=",xlength,":",ylength,":",xstart,":",ystart,"",
                       sep = "")
 
@@ -76,47 +82,55 @@ av_encode_video(video_path, paste(workingdir, "/test1w%03d_cropped.png", sep = "
 
 file_list = list.files(workingdir, full.names = TRUE, pattern = "\\_cropped.png$")
 
+prettylist = pretty(1:length(file_list),n = 6)
+prettylist = subset(prettylist, prettylist<length(file_list))
 
-thresholds = c()
+file_list_s = file_list[prettylist]
 
-for(file in file_list)
+overallthreshold = mean(unlist(lapply(file_list, calculate_auto_threshold)))
+autothreshold = overallthreshold
+
+latchthresh = TRUE
+
+while(latchthresh){
+
+plotmatrix = as.imlist(lapply(lapply(file_list_s, threshold_image, threshold = overallthreshold), function(x) { as.cimg(x[[1]])}))
+
+make_matrix(plotmatrix, width = 10) %>% plot
+
+print(paste("Default thresold:", autothreshold))
+print(paste("Current threshold is:", overallthreshold))
+
+print("Input any number less than 1 to change the threshold")
+
+status = menu(c("Change", "Accept", "Re-crop", "Exit"))
+
+if(status == 4)
 {
-  thresholds = c(thresholds,calculate_auto_threshold(file_path = file))
+  stop("Function exited")
+} else if(status == 2)
+{
+  latchthresh = FALSE
+}
+else if(status == 3)
+{
+  latchthresh = FALSE
+  latchcrop = TRUE
+} else
+{
+  cat("\n New threshold")
+  overallthreshold <- as.numeric(scan(what=character(),nmax=1,quiet=TRUE))
 }
 
-overallthreshold = mean(thresholds)
-
-accept_threshold = FALSE
-
-while(!accept_threshold)
-{
-
-thresholded = imlist()
-
-for(file in file_list)
-{
-  print(file)
-  thresholded = ci(thresholded, threshold_image(file_path = file, threshold = overallthreshold)[[1]])
-}
-
-make_matrix(thresholded, width = 8) %>% plot
-
-print(paste("Threshold is:", overallthreshold))
-
-cat("\nEnter y to accept, or a new number to recalculate")
-again <- scan(what=character(),nmax=1,quiet=TRUE)
-
-if(again =="y")
-{
-  accept_threshold = TRUE
-}
-else
-{
-  overallthreshold = as.numeric(again)
-}
 
 }
 
+}
+draw_rect(rotated,xstart,ystart,xstart+xlength, ystart+ylength,color="green",opacity=0.3) %>% plot()
+
+print(paste("File name is:", video_name))
+
+roi_name = winDialogString("Enter ROI name", "")
 
 video_path = gsub("\\\\", "/", video_path)
 
@@ -129,7 +143,6 @@ variables = paste("threshold = '",overallthreshold,"',",
       " xstart = ", xstart,",",
       " ystart = ", ystart, sep ="")
 
-unlink(workingdir, recursive = TRUE)
 
 function_string = paste("threshold_apply(",variables,")")
 writeClipboard(function_string)
@@ -137,6 +150,11 @@ writeClipboard(function_string)
 function_string = paste("\n", function_string, "\n ")
 
 cat(crayon::green(function_string))
+
+
+threshold_apply(threshold = overallthreshold, roi_name = roi_name, video_path = video_path, radians = radians, xlength = xlength, ylength = ylength, xstart = xstart, ystart = ystart, image_list = file_list)
+
+unlink(workingdir, recursive = TRUE)
 
 }
 
