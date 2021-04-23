@@ -1,6 +1,9 @@
-#' Title
+#' Select a ROI from a video file
 #'
-#' @return
+#' This function provides a graphical tool to walk the user through selecting a ROI from an AVI video.
+#'
+#' @return Saves an annotated AVI and CSV file in the same directory as the video. Will also output and copy the paramaters used to create the video.
+#'
 #' @export
 #'
 #' @importFrom av av_video_images av_encode_video
@@ -9,6 +12,9 @@
 #' @importFrom utils winDialogString
 #'
 #' @examples
+#' # select_roi()
+#' # Only runs in an interactive session
+#'
 select_roi = function()
 {
 

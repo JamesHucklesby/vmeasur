@@ -2,16 +2,22 @@
 % Please edit documentation in R/thresholding.R
 \name{threshold_image}
 \alias{threshold_image}
-\title{Title}
+\title{Threshold an image}
 \usage{
-threshold_image(file_path, threshold)
+threshold_image(file_path, threshold, min_area = 100)
 }
 \arguments{
-\item{threshold}{}
+\item{file_path}{Path to the image for quantification}
+
+\item{threshold}{Threshold to set for the inverse channel. Range 0-1.}
 }
 \value{
-
+A list containing 1) the processed threshold image and 2) calculated widths
 }
 \description{
-Title
+Threshold an image
+}
+\examples{
+# No examples
+
 }

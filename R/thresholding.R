@@ -1,79 +1,79 @@
-#' Title
+#' Threshold an image
 #'
-#' @param file_path
-#' @param threshold
+#' @param file_path Path to the image for quantification
+#' @param threshold Threshold to set for the inverse channel. Range 0-1.
 #'
-#' @return
+#' @return A list containing 1) the processed threshold image and 2) calculated widths
+#'
 #' @export
 #'
 #' @examples
-threshold_image <- function(file_path, threshold)
+#' # No examples
+#'
+threshold_image <- function(file_path, threshold, min_area = 100)
 {
 
-  im <- load.image(file_path)
+  # Load the image and split it into it's channels
+  im <- imager::load.image(file_path)
+  im.c = imager::imsplit(im,"c")[[1]]
 
-  # d <- as.data.frame(im)
-  # ##Subsamble, fit a linear model
-  # m <- d %>% lm(value ~ x*y,data=.)
-  # ##Correct by removing the trend, and invert the image
-  # im.c <- 1-(im-predict(m,d))
-  # # Grab the red channel
+  # Histogram plot if needed for debugging
+  #hist(as.data.frame(im.c)$value)
 
-  im.c = imsplit(im,"c")[[1]]
-  hist(as.data.frame(im.c)$value)
+  # Threshold the image
 
   px = im.c<threshold
   px = imager::clean(px,2)
-  plot(px)
+  # plot(px)
 
-  # Find the biggest patch of detected vessel, and isolate it
-  # spl <- split_connected(px)
-  # # biggest_region = which.max(unlist(lapply(spl, sum)))
-  # # region = spl[[biggest_region]] == 1
+  # If pixels have been located, split them into contiguous areas of greater than 100px in size
 
   if(sum(px)>0)
   {
-    pxconn = split_connected(px) %>% purrr::discard(~ sum(.) < 100)
+    pxconn = imager::split_connected(px) %>% purrr::discard(~ sum(.) < min_area)
   } else
   {
     pxconn = list()
   }
 
+  # If there is more than one area that passes, stick them together into a single mask
+
   if(length(pxconn)>1)
   {
-    region =  pxconn %>% parany %>% plot
+    region =  pxconn %>% imager::parany %>% imager::plot
   } else
   {
     region = px
   }
 
+  # Plot out the greyscale for debugging
+  #hist(as.data.frame(grayscale(im))$value)
 
-  hist(as.data.frame(grayscale(im))$value)
 
+  # Find and expand the overlapped pixels
   maximal <- (im.c>0.99)
-  maximal = grow(maximal, 10)
+  maximal = imager::grow(maximal, 10)
 
+  # Superimpose the two searches to find any overlap
   overlaid_regions = region+maximal
 
-  # Draw out
+  # Combine the data into a visualisation
+  boundary_lines = imager::imappend(imager::imlist(imager::boundary(region)==2,imager::boundary(region), maximal), "c")
+  imagelist = imager::imlist(imager::as.cimg(boundary_lines), im)
+  overlap_image = imager::parmax(imagelist)
+  # plot(overlap_image)
 
-  boundary_lines = imappend(imlist(imager::boundary(region)==2,imager::boundary(region), maximal), "c")
-
-  imagelist = imlist(as.cimg(boundary_lines), im)
-
-  overlap_image = parmax(imagelist)
-
-  plot(overlap_image)
-
-
+  # Calculate overlaid pixels
   overlapping = as.data.frame(overlaid_regions)
-  yoverlap = overlapping %>% group_by(y) %>% summarise(bubble = max(value)==2)
+  yoverlap = overlapping %>% dplyr::group_by(y) %>% dplyr::summarise(bubble = max(value)==2)
 
+  # Calculate vessel widths
   output = as.data.frame(as.cimg(region))
-  widths = output %>% group_by(y) %>% summarise(p_width = sum(value))
+  widths = output %>% dplyr::group_by(y) %>% dplyr::summarise(p_width = sum(value))
 
+  # Unify data and add metadata
   widths$excluded = yoverlap$bubble
-  widths$filename = basename(file_path_sans_ext(file_path))
+  widths$filename = basename(tools::file_path_sans_ext(file_path))
 
   return(list(overlap_image, widths))
 
@@ -81,31 +81,33 @@ threshold_image <- function(file_path, threshold)
 
 
 
-
-
-#' Title
+#' Thresold a video with pre-determined parameters
 #'
-#' @param threshold
-#' @param roi_name
-#' @param video_path
-#' @param radians
-#' @param xlength
-#' @param ylength
-#' @param xstart
-#' @param ystart
+#' Using pre-determined values this function generates ROI from a video. If parameters are not known, use select_roi()
+#' This function is optimized to run in parallel, so should be relatively rapid. If running slowly, check the scratch disk is set correctly.
 #'
-#' @return
+#' @param threshold The threshold for the red channel. Range 0-1.
+#' @param roi_name Name assigned to the region of interest
+#' @param video_path Locaton of the video file to process
+#' @param radians Degrees to rotate the image, in radians
+#' @param xlength Number of x pixels in the ROI
+#' @param ylength Number of y pixels in the ROI
+#' @param xstart ROI starting x co-ordinate
+#' @param ystart ROI starting y co-ordinate
+#'
+#' @return Saves the quantified CSV and overlaid video in the same directory as the video
+#'
 #' @export
 #'
 #' @examples
-threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = '\\\\files.auckland.ac.nz\\research\\ressci202000061-PROM-study\\Version 5\\image826.avi',radians = 0.217604550320612,xlength = 60,ylength = 242,xstart = 696,ystart = 323, image_list = NULL)
+threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = 'image826.avi',radians = 0.217604550320612,xlength = 60,ylength = 242,xstart = 696,ystart = 323, image_list = NULL)
 {
 
 
 directory = scratch_dir()
 video_folder = dirname(video_path)
 
-video_name = paste(basename(file_path_sans_ext(video_path)),"_",roi_name, sep = "")
+video_name = paste(basename(tools::file_path_sans_ext(video_path)),"_",roi_name, sep = "")
 
 
 
@@ -119,17 +121,19 @@ else
   temp_path = paste(directory, "/", video_name, sep = "")
   dir.create(temp_path)
 
-
   filter_string = paste("rotate = '",radians,":out_w=rotw(",radians,"):out_h=roth(",radians,"):c = red',",
                         "crop=",xlength,":",ylength,":",xstart,":",ystart,"",
                         sep = "")
 
-  av_encode_video(video_path, paste(temp_path, "/test1w%03d.png", sep = ""), vfilter = filter_string, codec = "png")
+  av::av_encode_video(video_path, paste(temp_path, "/test1w%03d.png", sep = ""), vfilter = filter_string, codec = "png")
 
-  # av_video_images(paste(temp_path, "/croprotate.avi", sep = ""), destdir = temp_path, format = "png", vfilter = filter_string)
 
   file_list = list.files(temp_path, full.names = TRUE, pattern = "\\.png$")
 }
+
+library(doSNOW)
+library(progress)
+library(parallel)
 
 cl <- makeCluster(16)
 registerDoSNOW(cl)
@@ -161,7 +165,7 @@ close(pb)
 stopCluster(cl)
 
 file_list = list.files(temp_path, full.names = TRUE, pattern = "\\overlaid.png$")
-av_encode_video(file_list, output = paste(temp_path, "/overlaid.avi", sep = ""),codec = "libx264", verbose = 24)
+av::av_encode_video(file_list, output = paste(temp_path, "/overlaid.avi", sep = ""),codec = "libx264", verbose = 24)
 
 file_list = list.files(temp_path, full.names = TRUE, pattern = "\\overlaid.csv$")
 ldf <- lapply(file_list , read.csv)
