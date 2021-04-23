@@ -6,6 +6,9 @@ blank = function()
   if(length(new.packages)) install.packages(new.packages)
   lapply(libraries, library, character.only = TRUE)
 
+  # SH29S2
+
+
   setwd("//files.auckland.ac.nz/research/ressci202000061-PROM-study/vmeasur")
   devtools::load_all()
 
