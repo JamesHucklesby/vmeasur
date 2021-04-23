@@ -1,18 +1,21 @@
 #' Title
 #'
 #' @param input_vector
+#' @param kband
+#' @param nups
+#' @param min_change
 #'
 #' @return
 #' @export
 #'
 #' @examples
-find_peaks = function(input_vector)
+find_peaks = function(input_vector, kband = 20, nups = 5, min_change = 1)
 {
 
-smooth_vector = ksmooth(time(1:length(input_vector)), input_vector, 'normal', bandwidth = 20)$y
+smooth_vector = ksmooth(time(1:length(input_vector)), input_vector, 'normal', bandwidth = kband)$y
 
-x = findpeaks(smooth_vector, nups = 5)
-y = findpeaks(-smooth_vector, nups = 5)
+x = findpeaks(smooth_vector, nups = nups)
+y = findpeaks(-smooth_vector, nups = nups)
 y[,1] = -y[,1]
 
 # Not run:
@@ -40,6 +43,8 @@ events = events %>% mutate(event_change = end_value - start_value,
                   event_duration = event_end - event_start,
                   event_gradient = event_change/event_duration)
 
+events = subset(events, events$event_change>min_change)
+
 return(events)
 }
 
@@ -55,14 +60,14 @@ return(events)
 #' @export
 #'
 #' @examples
-find_peaks_y = function(ylocation, datum)
+find_peaks_y = function(ylocation, datum, ...)
 {
 
   datum_mini = datum %>% filter(y == ylocation)
 
   raw_vector = datum_mini$p_width
 
-  toreturn = find_peaks(raw_vector)
+  toreturn = find_peaks(raw_vector, ...)
 
   toreturn$y_location = ylocation
 
@@ -71,7 +76,7 @@ find_peaks_y = function(ylocation, datum)
 }
 
 
-
+# Legacy code for detecton of peaks
 
 # events = data.frame(location = c(y[,2],x[,2]), value = c(y[,1],x[,1]))
 #
