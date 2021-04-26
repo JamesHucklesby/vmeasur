@@ -2,3 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+plots.pdf
+plots_ecg.pdf
+plots_fitted.pdf
+plots_points.pdf
+plots_smooth.pdf
