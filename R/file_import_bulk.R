@@ -6,6 +6,9 @@
 #' @export
 #'
 #' @examples
+#'
+#' filename = folder_files[1]
+#'
 import_file = function(filename)
 {
   csvfile = read.csv(filename)
@@ -14,8 +17,11 @@ import_file = function(filename)
   csvfile$file_id = NULL
   csvfile$frame = extract_numeric(csvfile$filename)-1000
 
-  csvfile = csvfile %>% group_by(y, filename, frame) %>%
-    mutate(excluded = sum(excluded)==0) %>%
+  # csvfile %>% select(y, excluded) %>% distinct()
+  # toexclude = csvfile %>% group_by(y) %>% summarise(excluded = sum(excluded==1))
+
+  csvfile = csvfile %>% group_by(y) %>%
+    mutate(excluded = sum(excluded)>1) %>%
     ungroup() %>%
     mutate(p_width = ifelse(!excluded, p_width, NA))
 
@@ -49,7 +55,7 @@ import_file = function(filename)
 #' @export
 #'
 #' @examples
-import_files = function(csv_files)
+import_all_folder = function(csv_files)
 {
 
 cl <- makeCluster(detectCores()-1)
@@ -60,6 +66,7 @@ progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress = progress)
 result <- foreach(i = 1:iterations, .options.snow = opts, .verbose  = FALSE) %dopar%
   {
+      library(vmeasur)
       library(tidyverse)
       library(tools)
       import_file(csv_files[[i]])

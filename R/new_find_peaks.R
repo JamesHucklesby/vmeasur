@@ -9,13 +9,19 @@
 #' @export
 #'
 #' @examples
-find_peaks = function(input_vector, kband = 20, nups = 5, min_change = 1)
+find_peaks = function(input_vector, kband = 30, nups = 10, min_change = 1)
 {
 
 smooth_vector = ksmooth(time(1:length(input_vector)), input_vector, 'normal', bandwidth = kband)$y
 
-x = findpeaks(smooth_vector, nups = nups)
-y = findpeaks(-smooth_vector, nups = nups)
+x = findpeaks(smooth_vector, nups = nups, ndown = nups, zero = "+")
+y = findpeaks(-smooth_vector, nups = nups, ndown = nups, zero = "+")
+
+if(!isTRUE(nrow(x)>1 & nrow(y)>1))
+{
+  return(NULL)
+}
+
 y[,1] = -y[,1]
 
 # Not run:
@@ -24,26 +30,25 @@ grid()
 points(x[, 2], x[, 1], pch=20, col="maroon")
 points(y[, 2], y[, 1], pch=20, col="darkgreen")
 
-maxima = data.frame(value = x[,1], event = x[,2],event_start = x[,3],event_end = x[,4],type = "contract")
-minima = data.frame(value = y[,1], event = y[,2],event_start = y[,3],event_end = y[,4],type = "fill")
-
+if(isTRUE(nrow(x)>1 & nrow(y)>1))
+{
+maxima = data.frame(event_start = x[,2],event_end = x[,4],type = "contract")
+minima = data.frame(event_start = y[,2],event_end = y[,4],type = "fill")
 events = rbind(maxima, minima)
+}else
+{
+  return(NULL)
+}
 
-events$start_value = events$value
-events$value = NULL
-
-events$event_start = events$event
-events$event = NULL
+events$start_value = smooth_vector[events$event_start]
+events$end_value = smooth_vector[events$event_end]
 
 events = subset(events, !events$event_end == length(input_vector))
-
-events$end_value = input_vector[events$event_end]
 
 events = events %>% mutate(event_change = end_value - start_value,
                   event_duration = event_end - event_start,
                   event_gradient = event_change/event_duration)
 
-events = subset(events, events$event_change>min_change)
 
 return(events)
 }
