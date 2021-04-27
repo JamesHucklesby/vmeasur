@@ -9,11 +9,13 @@
 #' @importFrom av av_video_images av_encode_video
 #' @importFrom imager load.image grabLine draw_rect grabLine imrotate grabRect as.imlist as.cimg draw_rect
 #' @importFrom rlang hash
-#' @importFrom utils winDialogString menu writeClipboard
+#' @importFrom utils menu writeClipboard
 #' @importFrom tools file_path_sans_ext
 #' @importFrom rlang hash
 #' @importFrom magrittr %>%
 #' @importFrom crayon green
+#' @importFrom svDialogs dlg_input
+
 #'
 #'
 #' @examples
@@ -137,7 +139,8 @@ draw_rect(rotated,xstart,ystart,xstart+xlength, ystart+ylength,color="green",opa
 
 print(paste("File name is:", video_name))
 
-roi_name = winDialogString("Enter ROI name", "")
+roi_name = dlg_input("Enter ROI Name?", "")$res
+
 
 video_path = gsub("\\\\", "/", video_path)
 

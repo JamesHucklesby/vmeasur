@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: CC BY-NC-SA 4.0
 Imports: ggplot2, imager, av, tools, dplyr, rlang, foreach, doParallel, magrittr, pbmcapply, progress, parallel, 
-            graphics, stats, utils, pracma, readr, stringr, tidyr, crayon, purrr
+            graphics, stats, utils, pracma, readr, stringr, tidyr, crayon, purrr, svDialogs
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
