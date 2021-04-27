@@ -34,7 +34,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: FedericoCarboni/setup-ffmpeg@v1
 
       - uses: r-lib/actions/setup-r@v1
         with:
@@ -60,8 +59,6 @@ jobs:
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get install libavfilter-dev
-
           while read -r cmd
           do
             eval sudo $cmd
