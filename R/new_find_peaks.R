@@ -1,9 +1,9 @@
-#' Title
+#' Find peaks in a vascular time series
 #'
-#' @param input_vector
-#' @param kband
-#' @param nups
-#' @param min_change
+#' @param input_vector vector of values to analyze
+#' @param kband K smoothing window to apply to the data
+#' @param nups number of increases before and after the dataset to threshold on
+#' @param min_change minimum size of change to be termed significant
 #'
 #' @importFrom stats ksmooth time
 #' @importFrom pracma findpeaks
@@ -13,17 +13,21 @@
 #'
 #'
 #'
-#' @return
+#' @return A vector of peaks detected
+#'
 #' @export
 #'
 #' @examples
+#' i = 1
+#' # Test to come
+#'
 find_peaks = function(input_vector, kband = 30, nups = 10, min_change = 1)
 {
 
 smooth_vector = ksmooth(time(1:length(input_vector)), input_vector, 'normal', bandwidth = kband)$y
 
-x = findpeaks(smooth_vector, nups = nups, ndown = nups, zero = "+")
-y = findpeaks(-smooth_vector, nups = nups, ndown = nups, zero = "+")
+x = findpeaks(smooth_vector, nups = nups, ndowns = nups, zero = "+")
+y = findpeaks(-smooth_vector, nups = nups, ndowns = nups, zero = "+")
 
 if(!isTRUE(nrow(x)>1 & nrow(y)>1))
 {
@@ -64,19 +68,25 @@ return(events)
 
 
 
-#' Title
+#' find peaks at a single y row
 #'
-#' @param ylocation
-#' @param datum
+#' @param ylocation y co-ordinate to analyse
+#' @param datum raw dataset
+#' @param ... further arguments to be passed through to find_peaks
 #'
 #' @importFrom magrittr %>%
 #' @importFrom dplyr filter
 #'
 #'
-#' @return
+#' @return A find_peaks result
+#'
 #' @export
 #'
 #' @examples
+#'
+#' # Test here
+#'
+#'
 find_peaks_y = function(ylocation, datum, ...)
 {
 

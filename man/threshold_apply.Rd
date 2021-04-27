@@ -2,7 +2,7 @@
 % Please edit documentation in R/thresholding.R
 \name{threshold_apply}
 \alias{threshold_apply}
-\title{Thresold a video with pre-determined parameters}
+\title{Threshold a video with pre-determined parameters}
 \usage{
 threshold_apply(
   threshold = 0.5,
@@ -21,7 +21,7 @@ threshold_apply(
 
 \item{roi_name}{Name assigned to the region of interest}
 
-\item{video_path}{Locaton of the video file to process}
+\item{video_path}{Location of the video file to process}
 
 \item{radians}{Degrees to rotate the image, in radians}
 
@@ -32,6 +32,8 @@ threshold_apply(
 \item{xstart}{ROI starting x co-ordinate}
 
 \item{ystart}{ROI starting y co-ordinate}
+
+\item{image_list}{If pre-computed, a list of images to use rather than a video}
 }
 \value{
 Saves the quantified CSV and overlaid video in the same directory as the video
@@ -39,4 +41,9 @@ Saves the quantified CSV and overlaid video in the same directory as the video
 \description{
 Using pre-determined values this function generates ROI from a video. If parameters are not known, use select_roi()
 This function is optimized to run in parallel, so should be relatively rapid. If running slowly, check the scratch disk is set correctly.
+}
+\examples{
+
+# test to come
+
 }

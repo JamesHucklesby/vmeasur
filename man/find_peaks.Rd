@@ -2,16 +2,27 @@
 % Please edit documentation in R/new_find_peaks.R
 \name{find_peaks}
 \alias{find_peaks}
-\title{Title}
+\title{Find peaks in a vascular time series}
 \usage{
 find_peaks(input_vector, kband = 30, nups = 10, min_change = 1)
 }
 \arguments{
-\item{min_change}{}
+\item{input_vector}{vector of values to analyze}
+
+\item{kband}{K smoothing window to apply to the data}
+
+\item{nups}{number of increases before and after the dataset to threshold on}
+
+\item{min_change}{minimum size of change to be termed significant}
 }
 \value{
-
+A vector of peaks detected
 }
 \description{
-Title
+Find peaks in a vascular time series
+}
+\examples{
+i = 1
+# Test to come
+
 }

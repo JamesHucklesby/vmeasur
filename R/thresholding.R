@@ -2,10 +2,19 @@
 #'
 #' @param file_path Path to the image for quantification
 #' @param threshold Threshold to set for the inverse channel. Range 0-1.
+#' @param min_area The minimum number of pixels in an area to not ignore as noise
 #'
-#' @return A list containing 1) the processed threshold image and 2) calculated widths
+#' @return A list containing
+#'              1) the processed threshold image
+#'              2) calculated widths
+#'
+#' @importFrom imager load.image imsplit clean parany
+#' @importFrom dplyr summarise group_by
+#' @importFrom magrittr `%>%`
 #'
 #' @export
+#'
+#' @importFrom purrr discard
 #'
 #' @examples
 #' # No examples
@@ -40,7 +49,7 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 
   if(length(pxconn)>1)
   {
-    region =  pxconn %>% imager::parany %>% imager::plot
+    region =  pxconn %>% imager::parany %>% plot
   } else
   {
     region = px
@@ -65,11 +74,11 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 
   # Calculate overlaid pixels
   overlapping = as.data.frame(overlaid_regions)
-  yoverlap = overlapping %>% dplyr::group_by(y) %>% dplyr::summarise(bubble = max(value)==2)
+  yoverlap = overlapping %>% dplyr::group_by(`y`) %>% dplyr::summarise(bubble = max(`value`)==2)
 
   # Calculate vessel widths
   output = as.data.frame(as.cimg(region))
-  widths = output %>% dplyr::group_by(y) %>% dplyr::summarise(p_width = sum(value))
+  widths = output %>% dplyr::group_by(`y`) %>% dplyr::summarise(p_width = sum(`value`))
 
   # Unify data and add metadata
   widths$excluded = yoverlap$bubble
@@ -81,29 +90,30 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 
 
 
-#' Thresold a video with pre-determined parameters
+#' Threshold a video with pre-determined parameters
 #'
 #' Using pre-determined values this function generates ROI from a video. If parameters are not known, use select_roi()
 #' This function is optimized to run in parallel, so should be relatively rapid. If running slowly, check the scratch disk is set correctly.
 #'
 #' @param threshold The threshold for the red channel. Range 0-1.
 #' @param roi_name Name assigned to the region of interest
-#' @param video_path Locaton of the video file to process
+#' @param video_path Location of the video file to process
 #' @param radians Degrees to rotate the image, in radians
 #' @param xlength Number of x pixels in the ROI
 #' @param ylength Number of y pixels in the ROI
 #' @param xstart ROI starting x co-ordinate
 #' @param ystart ROI starting y co-ordinate
+#' @param image_list If pre-computed, a list of images to use rather than a video
 #'
 #'
 #' @return Saves the quantified CSV and overlaid video in the same directory as the video
 #'
 #' @importFrom snow makeCluster stopCluster
-#' @importFrom doSNOW registerDoSnow
+#' @importFrom doSNOW registerDoSNOW
 #' @importFrom pbmcapply progressBar
-#' @importFrom utils setTxtProgressBar
+#' @importFrom utils setTxtProgressBar  write.csv read.csv
 #' @importFrom foreach `%dopar%` foreach
-#' @importFrom tools file_path_sans_ext write.csv read.csv
+#' @importFrom tools file_path_sans_ext
 #' @importFrom magrittr `%>%`
 #' @importFrom imager as.cimg
 #'
@@ -111,6 +121,9 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 #' @export
 #'
 #' @examples
+#'
+#' # test to come
+#'
 threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = 'image826.avi',radians = 0.217604550320612,xlength = 60,ylength = 242,xstart = 696,ystart = 323, image_list = NULL)
 {
 
@@ -142,10 +155,6 @@ else
   file_list = list.files(temp_path, full.names = TRUE, pattern = "\\.png$")
 }
 
-library(doSNOW)
-library(progress)
-library(parallel)
-
 cl <- makeCluster(16)
 registerDoSNOW(cl)
 iterations <- length(file_list)
@@ -157,19 +166,16 @@ opts <- list(progress = progress)
 result <- foreach(i = file_list, .combine = rbind,
                   .options.snow = opts, .export = "threshold_image") %dopar%
   {
-    library(imager)
-    library(dplyr)
-    library(tools)
 
     processed_image = vmeasur::threshold_image(i, threshold)
 
     file_path = i
 
-    save_image_path = paste(file_path_sans_ext(i), "_overlaid.png", sep = "")
-    save_csv_path = paste(file_path_sans_ext(i), "_overlaid.csv", sep = "")
+    save_image_path = paste(tools::file_path_sans_ext(i), "_overlaid.png", sep = "")
+    save_csv_path = paste(tools::file_path_sans_ext(i), "_overlaid.csv", sep = "")
 
-    save.image(processed_image[[1]], save_image_path)
-    write.csv(processed_image[[2]], save_csv_path)
+    imager::save.image(processed_image[[1]], save_image_path)
+    utils::write.csv(processed_image[[2]], save_csv_path)
   }
 
 close(pb)

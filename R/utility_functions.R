@@ -1,13 +1,19 @@
-#' Title
+#' Calculate an automatically generated threshold as a number
 #'
-#' @param file_path
+#' @param file_path path of the file to calculate the threshold from
 #'
 #' @importFrom magrittr %>%
+#' @importFrom imager load.image imsplit
 #'
-#' @return
+#' @return The numerical threshold automatically calculated by imager
+#'
 #' @export
 #'
 #' @examples
+#' i = 1
+#'
+# # calculate_auto_threshold(imager::boats)
+#'
 calculate_auto_threshold = function(file_path)
 {
   im = imager::load.image(file_path)
@@ -25,21 +31,32 @@ calculate_auto_threshold = function(file_path)
 }
 
 
-#' Title
+#' Crop an image, starting at (x,y) co-ordinates
 #'
-#' @param img
-#' @param xstart
-#' @param ystart
-#' @param xlength
-#' @param ylength
+#' Crop an image with the same data used by FFMPEG, allowing for the same
+#' co-ordinates to be used with av. Note av is much faster in aggregate so
+#' should be used for processing whole videos rather than generating and
+#' cropping a series of images.
+#'
+#' @param img an imager image to crop
+#' @param xstart starting x co-ordinate
+#' @param ystart starting y co-ordinate
+#' @param xlength x axes length
+#' @param ylength y axes length
 #'
 #' @importFrom dplyr filter
 #' @importFrom imager autocrop as.cimg
 #'
-#' @return
+#' @importFrom dplyr filter
+#' @importFrom imager autocrop as.cimg
+#'
+#' @return a cropped image
+#'
 #' @export
 #'
 #' @examples
+#' # TEST HERE
+#'
 crop_dims = function(img, xstart, ystart, xlength, ylength)
 {
   img.df = as.data.frame(img)
@@ -49,17 +66,22 @@ crop_dims = function(img, xstart, ystart, xlength, ylength)
 }
 
 
-#' Title
+#' Tile multiple images into a single image
 #'
-#' @param output_list
-#' @param width
+#' @param output_list list of images to turn into a matrix
+#' @param width matrix width in images, default 2
 #'
 #' @importFrom imager imlist pad ci imappend
 #'
-#' @return
+#' @return an image, with each input arranged in a matrix
+#'
 #' @export
 #'
 #' @examples
+#' imagelist = imager::imlist(imager::boats, imager::boats, imager::boats)
+#' matrix = make_matrix(imagelist)
+#' plot(matrix)
+#'
 make_matrix = function(output_list, width = 2)
 {
   total_images = length(output_list)
@@ -92,11 +114,18 @@ make_matrix = function(output_list, width = 2)
 }
 
 
-#' Title
+#' Set the scratch directory for vmeasur
 #'
-#' @param set
+#' vmeasur uses av to unpack temporary image files, which are then stored for
+#' further usage. This runs better if done to a high speed storage locaiton such
+#' as a ram drive. This fuction sets that directory.
 #'
-#' @return
+#' If not specified, the default R tempdir is used
+#'
+#' @param set new directory to set
+#'
+#' @return the current location of the scratch directory
+#'
 #' @export
 #'
 #' @examples

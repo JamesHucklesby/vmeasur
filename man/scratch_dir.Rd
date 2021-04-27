@@ -2,18 +2,23 @@
 % Please edit documentation in R/utility_functions.R
 \name{scratch_dir}
 \alias{scratch_dir}
-\title{Title}
+\title{Set the scratch directory for vmeasur}
 \usage{
 scratch_dir(set = NULL)
 }
 \arguments{
-\item{set}{}
+\item{set}{new directory to set}
 }
 \value{
-
+the current location of the scratch directory
 }
 \description{
-Title
+vmeasur uses av to unpack temporary image files, which are then stored for
+further usage. This runs better if done to a high speed storage locaiton such
+as a ram drive. This fuction sets that directory.
+}
+\details{
+If not specified, the default R tempdir is used
 }
 \examples{
 scratch_dir()

@@ -2,16 +2,24 @@
 % Please edit documentation in R/utility_functions.R
 \name{make_matrix}
 \alias{make_matrix}
-\title{Title}
+\title{Tile multiple images into a single image}
 \usage{
 make_matrix(output_list, width = 2)
 }
 \arguments{
-\item{width}{}
+\item{output_list}{list of images to turn into a matrix}
+
+\item{width}{matrix width in images, default 2}
 }
 \value{
-
+an image, with each input arranged in a matrix
 }
 \description{
-Title
+Tile multiple images into a single image
+}
+\examples{
+imagelist = imager::imlist(imager::boats, imager::boats, imager::boats)
+matrix = make_matrix(imagelist)
+plot(matrix)
+
 }

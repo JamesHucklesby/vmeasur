@@ -2,21 +2,21 @@
 % Please edit documentation in R/file_import_bulk.R
 \name{import_file}
 \alias{import_file}
-\title{Title}
+\title{Import a saved file}
 \usage{
 import_file(filename)
 }
 \arguments{
-\item{filename}{}
+\item{filename}{the csv file to import from}
 }
 \value{
-
+a cleaned up data frame
 }
 \description{
-Title
+Import a saved file
 }
 \examples{
+i = 1
 
-filename = folder_files[1]
 
 }

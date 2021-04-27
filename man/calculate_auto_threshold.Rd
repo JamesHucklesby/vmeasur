@@ -2,16 +2,21 @@
 % Please edit documentation in R/utility_functions.R
 \name{calculate_auto_threshold}
 \alias{calculate_auto_threshold}
-\title{Title}
+\title{Calculate an automatically generated threshold as a number}
 \usage{
 calculate_auto_threshold(file_path)
 }
 \arguments{
-\item{file_path}{}
+\item{file_path}{path of the file to calculate the threshold from}
 }
 \value{
-
+The numerical threshold automatically calculated by imager
 }
 \description{
-Title
+Calculate an automatically generated threshold as a number
+}
+\examples{
+i = 1
+
+
 }

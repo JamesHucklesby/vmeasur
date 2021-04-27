@@ -2,16 +2,26 @@
 % Please edit documentation in R/new_find_peaks.R
 \name{find_peaks_y}
 \alias{find_peaks_y}
-\title{Title}
+\title{find peaks at a single y row}
 \usage{
 find_peaks_y(ylocation, datum, ...)
 }
 \arguments{
-\item{datum}{}
+\item{ylocation}{y co-ordinate to analyse}
+
+\item{datum}{raw dataset}
+
+\item{...}{further arguments to be passed through to find_peaks}
 }
 \value{
-
+A find_peaks result
 }
 \description{
-Title
+find peaks at a single y row
+}
+\examples{
+
+# Test here
+
+
 }

@@ -1,8 +1,8 @@
-#' Title
+#' Import a saved file
 #'
-#' @param filename
+#' @param filename the csv file to import from
 #'
-#' @return
+#' @return a cleaned up data frame
 #'
 #' @importFrom dplyr bind_rows mutate group_by ungroup
 #' @importFrom tidyr extract_numeric
@@ -14,8 +14,8 @@
 #' @export
 #'
 #' @examples
+#' i = 1
 #'
-#' filename = folder_files[1]
 #'
 import_file = function(filename)
 {
@@ -55,21 +55,26 @@ import_file = function(filename)
 
 
 
-#' Parallel find all data code
+#' Parallel mass csv import code
 #'
-#' @param csv_files
+#' @param csv_files list of csv files to import
 #'
 #' @importFrom snow makeCluster stopCluster
-#' @importFrom paralell detectCores
-#' @importFrom doSNOW regiterDoSnow
+#' @importFrom parallel detectCores
+#' @importFrom doSNOW registerDoSNOW
 #' @importFrom pbmcapply progressBar
 #' @importFrom utils setTxtProgressBar
 #' @importFrom foreach `%dopar%` foreach
 #'
-#' @return
+#' @return A bulk list of imported csv files
+#'
 #' @export
 #'
 #' @examples
+#'
+#' # Test folder to come
+#'
+#'
 import_all_folder = function(csv_files)
 {
 
@@ -81,10 +86,7 @@ progress <- function(n) setTxtProgressBar(pb, n)
 opts <- list(progress = progress)
 result <- foreach(i = 1:iterations, .options.snow = opts, .verbose  = FALSE) %dopar%
   {
-      library(vmeasur)
-      library(tidyverse)
-      library(tools)
-      import_file(csv_files[[i]])
+      vmeasur::import_file(csv_files[[i]])
   }
 
 close(pb)

@@ -2,16 +2,22 @@
 % Please edit documentation in R/file_import_bulk.R
 \name{import_all_folder}
 \alias{import_all_folder}
-\title{Parallel find all data code}
+\title{Parallel mass csv import code}
 \usage{
 import_all_folder(csv_files)
 }
 \arguments{
-\item{csv_files}{}
+\item{csv_files}{list of csv files to import}
 }
 \value{
-
+A bulk list of imported csv files
 }
 \description{
-Parallel find all data code
+Parallel mass csv import code
+}
+\examples{
+
+# Test folder to come
+
+
 }

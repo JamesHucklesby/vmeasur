@@ -10,9 +10,13 @@ threshold_image(file_path, threshold, min_area = 100)
 \item{file_path}{Path to the image for quantification}
 
 \item{threshold}{Threshold to set for the inverse channel. Range 0-1.}
+
+\item{min_area}{The minimum number of pixels in an area to not ignore as noise}
 }
 \value{
-A list containing 1) the processed threshold image and 2) calculated widths
+A list containing
+             1) the processed threshold image
+             2) calculated widths
 }
 \description{
 Threshold an image

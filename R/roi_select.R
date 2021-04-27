@@ -13,8 +13,7 @@
 #' @importFrom tools file_path_sans_ext
 #' @importFrom rlang hash
 #' @importFrom magrittr %>%
-#'
-#'
+#' @importFrom crayon green
 #'
 #'
 #' @examples

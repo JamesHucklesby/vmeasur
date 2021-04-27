@@ -2,16 +2,31 @@
 % Please edit documentation in R/utility_functions.R
 \name{crop_dims}
 \alias{crop_dims}
-\title{Title}
+\title{Crop an image, starting at (x,y) co-ordinates}
 \usage{
 crop_dims(img, xstart, ystart, xlength, ylength)
 }
 \arguments{
-\item{ylength}{}
+\item{img}{an imager image to crop}
+
+\item{xstart}{starting x co-ordinate}
+
+\item{ystart}{starting y co-ordinate}
+
+\item{xlength}{x axes length}
+
+\item{ylength}{y axes length}
 }
 \value{
-
+a cropped image
 }
 \description{
-Title
+Crop an image with the same data used by FFMPEG, allowing for the same
+co-ordinates to be used with av. Note av is much faster in aggregate so
+should be used for processing whole videos rather than generating and
+cropping a series of images.
+}
+\examples{
+# TEST HERE
+
 }
