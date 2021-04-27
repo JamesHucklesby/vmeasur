@@ -95,7 +95,18 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 #' @param xstart ROI starting x co-ordinate
 #' @param ystart ROI starting y co-ordinate
 #'
+#'
 #' @return Saves the quantified CSV and overlaid video in the same directory as the video
+#'
+#' @importFrom snow makeCluster stopCluster
+#' @importFrom doSNOW registerDoSnow
+#' @importFrom pbmcapply progressBar
+#' @importFrom utils setTxtProgressBar
+#' @importFrom foreach `%dopar%` foreach
+#' @importFrom tools file_path_sans_ext write.csv read.csv
+#' @importFrom magrittr `%>%`
+#' @importFrom imager as.cimg
+#'
 #'
 #' @export
 #'

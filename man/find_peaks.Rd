@@ -4,10 +4,10 @@
 \alias{find_peaks}
 \title{Title}
 \usage{
-find_peaks(input_vector)
+find_peaks(input_vector, kband = 30, nups = 10, min_change = 1)
 }
 \arguments{
-\item{input_vector}{}
+\item{min_change}{}
 }
 \value{
 

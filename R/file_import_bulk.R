@@ -3,6 +3,14 @@
 #' @param filename
 #'
 #' @return
+#'
+#' @importFrom dplyr bind_rows mutate group_by ungroup
+#' @importFrom tidyr extract_numeric
+#' @importFrom utils read.csv
+#' @importFrom stringr str_split str_remove
+#' @importFrom readr parse_number
+#'
+#'
 #' @export
 #'
 #' @examples
@@ -20,10 +28,10 @@ import_file = function(filename)
   # csvfile %>% select(y, excluded) %>% distinct()
   # toexclude = csvfile %>% group_by(y) %>% summarise(excluded = sum(excluded==1))
 
-  csvfile = csvfile %>% group_by(y) %>%
+  csvfile = csvfile %>% group_by(`y`) %>%
     mutate(excluded = sum(excluded)>1) %>%
     ungroup() %>%
-    mutate(p_width = ifelse(!excluded, p_width, NA))
+    mutate(p_width = ifelse(!`excluded`, `p_width`, NA))
 
   csvfile$filename = NULL
 
@@ -50,6 +58,13 @@ import_file = function(filename)
 #' Parallel find all data code
 #'
 #' @param csv_files
+#'
+#' @importFrom snow makeCluster stopCluster
+#' @importFrom paralell detectCores
+#' @importFrom doSNOW regiterDoSnow
+#' @importFrom pbmcapply progressBar
+#' @importFrom utils setTxtProgressBar
+#' @importFrom foreach `%dopar%` foreach
 #'
 #' @return
 #' @export

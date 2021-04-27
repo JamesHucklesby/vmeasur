@@ -7,8 +7,7 @@
 threshold_apply(
   threshold = 0.5,
   roi_name = "test",
- 
-    video_path = "\\\\\\\\files.auckland.ac.nz\\\\research\\\\ressci202000061-PROM-study\\\\Version 5\\\\image826.avi",
+  video_path = "image826.avi",
   radians = 0.217604550320612,
   xlength = 60,
   ylength = 242,

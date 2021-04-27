@@ -7,9 +7,15 @@
 #' @export
 #'
 #' @importFrom av av_video_images av_encode_video
-#' @importFrom imager load.image grabLine draw_rect
+#' @importFrom imager load.image grabLine draw_rect grabLine imrotate grabRect as.imlist as.cimg draw_rect
 #' @importFrom rlang hash
-#' @importFrom utils winDialogString
+#' @importFrom utils winDialogString menu writeClipboard
+#' @importFrom tools file_path_sans_ext
+#' @importFrom rlang hash
+#' @importFrom magrittr %>%
+#'
+#'
+#'
 #'
 #' @examples
 #' # select_roi()

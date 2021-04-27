@@ -4,7 +4,7 @@
 \alias{find_peaks_y}
 \title{Title}
 \usage{
-find_peaks_y(ylocation, datum)
+find_peaks_y(ylocation, datum, ...)
 }
 \arguments{
 \item{datum}{}

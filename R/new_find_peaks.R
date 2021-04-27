@@ -5,6 +5,14 @@
 #' @param nups
 #' @param min_change
 #'
+#' @importFrom stats ksmooth time
+#' @importFrom pracma findpeaks
+#' @importFrom graphics grid points
+#' @importFrom magrittr %>%
+#' @importFrom dplyr mutate
+#'
+#'
+#'
 #' @return
 #' @export
 #'
@@ -45,9 +53,9 @@ events$end_value = smooth_vector[events$event_end]
 
 events = subset(events, !events$event_end == length(input_vector))
 
-events = events %>% mutate(event_change = end_value - start_value,
-                  event_duration = event_end - event_start,
-                  event_gradient = event_change/event_duration)
+events = events %>% mutate(`event_change` = `end_value` - `start_value`,
+                  `event_duration` = `event_end` - `event_start`,
+                  `event_gradient` = `event_change`/`event_duration`)
 
 
 return(events)
@@ -61,6 +69,10 @@ return(events)
 #' @param ylocation
 #' @param datum
 #'
+#' @importFrom magrittr %>%
+#' @importFrom dplyr filter
+#'
+#'
 #' @return
 #' @export
 #'
@@ -68,7 +80,7 @@ return(events)
 find_peaks_y = function(ylocation, datum, ...)
 {
 
-  datum_mini = datum %>% filter(y == ylocation)
+  datum_mini = datum %>% filter(`y` == ylocation)
 
   raw_vector = datum_mini$p_width
 

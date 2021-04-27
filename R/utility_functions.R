@@ -2,16 +2,18 @@
 #'
 #' @param file_path
 #'
+#' @importFrom magrittr %>%
+#'
 #' @return
 #' @export
 #'
 #' @examples
 calculate_auto_threshold = function(file_path)
 {
-  im = load.image(file_path)
-  im.c = imsplit(im,"c")[[1]]
+  im = imager::load.image(file_path)
+  im.c = imager::imsplit(im,"c")[[1]]
 
-  threshold_mask = as.data.frame(as.cimg(threshold(im.c)))
+  threshold_mask = as.data.frame(imager::as.cimg(imager::threshold(im.c)))
   im.c.df = as.data.frame(im.c)
 
   im.c.df$masked = threshold_mask$value
@@ -31,6 +33,9 @@ calculate_auto_threshold = function(file_path)
 #' @param xlength
 #' @param ylength
 #'
+#' @importFrom dplyr filter
+#' @importFrom imager autocrop as.cimg
+#'
 #' @return
 #' @export
 #'
@@ -48,6 +53,8 @@ crop_dims = function(img, xstart, ystart, xlength, ylength)
 #'
 #' @param output_list
 #' @param width
+#'
+#' @importFrom imager imlist pad ci imappend
 #'
 #' @return
 #' @export

@@ -15,3 +15,8 @@ import_file(filename)
 \description{
 Title
 }
+\examples{
+
+filename = folder_files[1]
+
+}
