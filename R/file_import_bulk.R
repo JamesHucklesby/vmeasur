@@ -59,9 +59,9 @@ import_file = function(filename)
 #'
 #' @param csv_files list of csv files to import
 #'
-#' @importFrom snow makeCluster stopCluster
+#' @importFrom parallel makeCluster stopCluster
 #' @importFrom parallel detectCores
-#' @importFrom doSNOW registerDoSNOW
+#' @importFrom doParallel registerDoParallel
 #' @importFrom pbmcapply progressBar
 #' @importFrom utils setTxtProgressBar
 #' @importFrom foreach `%dopar%` foreach
@@ -79,7 +79,7 @@ import_all_folder = function(csv_files)
 {
 
 cl <- makeCluster(detectCores()-1)
-registerDoSNOW(cl)
+registerDoParallel(cl)
 iterations <- length(csv_files)
 pb <- progressBar(max = iterations, style = "ETA")
 progress <- function(n) setTxtProgressBar(pb, n)

@@ -1,15 +1,15 @@
 Package: vmeasur
 Type: Package
-Title: Measure the witdth of dyed vessels, using video captured under an operating microscope
+Title: Quantify Vessels Videoed under an Operating Microscope
 Version: 0.1.0
 Authors@R: person("James", "Hucklesby", email = "jhuc964@aucklanduni.ac.nz",
                   role = c("aut", "cre"))
-Maintainer: The package maintainer <yourself@somewhere.net>
+Maintainer: James Hucklesby <jhuc964@aucklanduni.ac.nz>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: CC BY-NC-SA 4.0
-Imports: ggplot2, imager, av, tools, dplyr, rlang, foreach, doSNOW, magrittr, pbmcapply, progress, parallel, 
-            graphics, stats, utils, pracma, readr, snow, stringr, tidyr, crayon, purrr
+Imports: ggplot2, imager, av, tools, dplyr, rlang, foreach, doParallel, magrittr, pbmcapply, progress, parallel, 
+            graphics, stats, utils, pracma, readr, stringr, tidyr, crayon, purrr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

@@ -108,8 +108,8 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 #'
 #' @return Saves the quantified CSV and overlaid video in the same directory as the video
 #'
-#' @importFrom snow makeCluster stopCluster
-#' @importFrom doSNOW registerDoSNOW
+#' @importFrom parallel makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
 #' @importFrom pbmcapply progressBar
 #' @importFrom utils setTxtProgressBar  write.csv read.csv
 #' @importFrom foreach `%dopar%` foreach
@@ -156,7 +156,7 @@ else
 }
 
 cl <- makeCluster(16)
-registerDoSNOW(cl)
+registerDoParallel(cl)
 iterations <- length(file_list)
 pb <- progressBar(min = 0, max = iterations, initial = 0, style = "ETA", substyle = NA,
                   char = "=", width = NA, file = "")
