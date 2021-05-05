@@ -2,54 +2,96 @@ function()
 {
 
 
-  testdat =import_files(c("P:\\Full Dataset 2\\SH22S1\\image034_SH22S1.1_1.1_overlaid.csv"))
+
+# Y banded ROI
+
+roi_list = summary.df %>% select(site, animal, treatment, vessel) %>% distinct()
 
 
-csv_files = list.files("//files.auckland.ac.nz/research/ressci202000061-PROM-study/Full Dataset 2",
-                       recursive = TRUE, pattern = "\\_widths.csv$", full.names = TRUE)
-
-
-length(csv_files)
-
-# Completed files
-done = unique(basename(dirname(csv_files)))
-todo = basename(list.dirs("//files.auckland.ac.nz/research/ressci202000061-PROM-study/Full Dataset 2"))
-
-length(todo)
-length(done)
-length(done)/(length(todo)+length(done))
-
-done_dirs = unique(dirname(csv_files))
-
-# current_dir = "//files.auckland.ac.nz/research/ressci202000061-PROM-study/Full Dataset 2/SH22S1"
-
-for(current_dir in done_dirs)
+for(j in c(1:nrow(roi_list)))
 {
+  try({
 
-folder_files = list.files(current_dir, recursive = TRUE, pattern = "\\_widths.csv$", full.names = TRUE)
+  roi = roi_list[j,]
+  print(paste(j, "of",nrow(roi_list), "-",ceiling(j/nrow(roi_list)*100),"%"))
 
-fulldata = import_all_folder(folder_files)
+# Find peaks locally
 
-fulldata %>% group_by(source_video) %>% summarise(max = max(frame))
+fulldata_mean_mini = summary.df %>% filter(site == roi$site, animal == roi$animal, vessel == roi$vessel, treatment == roi$treatment)
 
-fulldata = fulldata %>% group_by(y, vessel, site, animal, treatment) %>% mutate(frame_id = row_number())
 
-fulldata_mean = fulldata %>% filter(!excluded) %>%
-  group_by(frame_id, frame,source_video, site, animal, treatment, vessel) %>%
-  summarise(p_mean = mean(p_width, na.rm = TRUE), p_median = median(p_width, na.rm = TRUE))
+video_shift = (fulldata_mean_mini %>% group_by(source_video) %>% summarise(video_shift = max(frame_id)))$video_shift
 
-write.csv(fulldata_mean, paste(current_dir, "/average.csv", sep = ""))
+ggplot(fulldata_mean_mini) +
+  geom_line(aes(x = frame_id, y = smooth, color = paste(vessel, "/", ygroup))) +
+  geom_vline(xintercept = video_shift) +
+  labs(title = (paste(i, ")" , roi$treatment, roi$animal, " S",roi$site, sep = "")))
+
+
+trace_table = fulldata_mean_mini %>% select(site, animal, vessel, treatment, source_video, ygroup) %>% distinct()
+trace_table$id = c(1:nrow(trace_table))
+
+res = list()
+
+for(i in c(1:nrow(trace_table)))
+{
+  #print(paste(j,i))
+  filters = trace_table[i,]
+  local_data = fulldata_mean_mini %>% filter(site == filters$site, animal == filters$animal, vessel == filters$vessel, treatment == filters$treatment, source_video == filters$source_video, ygroup == filters$ygroup)
+  output = find_peaks(input_vector = local_data$p_mean, min_dist = 30, kband = 30, min_change = 1, nups = 10)
+  if(!is.null(output))
+  {
+    output$id = i
+    res[[i]] = output
+  }
+}
+
+res.df = bind_rows(res)
+
+if(nrow(res.df)==0)
+{
+  return(TRUE)
+}
+
+full_trace_table = res.df %>% left_join(trace_table, by = c("id"))
+
+full_trace_contractions = full_trace_table %>% group_by(site, animal, vessel, treatment, source_video, ygroup) %>%
+      mutate(contractions = n())
+
+ggplot(full_trace_contractions) + geom_tile(aes(x = source_video, y = as.character(ygroup), fill = as.character(contractions)))+
+  geom_text(aes(label = contractions, x = source_video, y = ygroup)) +
+  theme(axis.text.x = element_text(angle = 90))
+
+combined_full_table = fulldata_mean_mini %>% left_join(full_trace_contractions) %>% mutate(event_maxima_id = event_maxima - frame + frame_id)
+
+
+vessid = (paste(roi$treatment, roi$animal, "_S",roi$site, "_V", roi$vessel, sep = ""))
+
+file_root = paste("//files.auckland.ac.nz/research/ressci202000061-PROM-study/Full Dataset 2/quantification/",vessid, sep = "")
+
+ggplot(combined_full_table) +
+  geom_line(aes(x = frame_id, y = smooth, color = as.character(contractions)))+
+  geom_vline(xintercept = video_shift) +
+  geom_point(aes(x = event_maxima_id, y = max_value), color = "blue") +
+  labs(title = vessid) +
+  facet_wrap(~paste(vessel, "/", ygroup))
+
+ggsave(file=paste(file_root, ".png", sep = ""), width = 297, height = 210, units = "mm")
+
+
+full_table_summary = combined_full_table %>% group_by(source_video, site, animal, treatment, vessel) %>% summarise(max_cont = max(contractions,0, na.rm = TRUE), max_magnitude = max(baseline_change))
+
+write.csv(full_table_summary, paste(file_root, "_summary.csv", sep = ""))
+})
 }
 
 
-csv_files = list.files("//files.auckland.ac.nz/research/ressci202000061-PROM-study/Full Dataset 2",
+csv_files = list.files("//files.auckland.ac.nz/research/ressci202000061-PROM-study/Full Dataset 2/quantification/",
                        recursive = TRUE, full.names = TRUE)
 
-summary_csv = subset(csv_files,(str_count(csv_files, "average.csv")>0))
+summary_csv = subset(csv_files,(str_count(csv_files, ".csv")>0))
 
 summary_data  = lapply(summary_csv, read.csv, as.is = TRUE)
-
-rbind(summary_data[[1]],summary_data[[2]],summary_data[[3]])
 
 summary.df = summary_data[[1]]
 
@@ -59,195 +101,46 @@ for(i in c(2:length(summary_data)))
   summary.df = rbind(summary.df, summary_data[[i]])
 }
 
-vessel_list = summary.df %>% select(vessel, source_video) %>% distinct()
+sum_clean = summary.df %>% mutate(treatment = str_replace(treatment, "Ap", "AP"))%>%
+  mutate(treatment = str_replace(treatment, "#FOS", "FOS"))
 
+ggplot(sum_clean) + geom_boxplot(aes(y = max_cont, x = treatment))
 
+summ2.df = sum_clean %>% group_by(site, animal, treatment, vessel, source_video) %>%
+  summarise(total_cont = max(max_magnitude))
 
-# summary.df = summary.df %>% group_by(vessel, source_video) %>%
-#   mutate(smooth = ksmooth(c(1:length(p_mean)), p_mean, kernel = "normal", bandwidth = 3, n.points= nrow(p_mean))$y) %>%
-#   ungroup()
+ggplot(summ2.df) + geom_boxplot(aes(y = total_cont, x = treatment))
 
-summary.df = summary.df %>% group_by(vessel, source_video) %>%
-  mutate(smooth = rollmean(p_mean, 5, fill = NA)) %>%
-  ungroup()
+summ2.5.df = summ2.df %>% group_by(site, animal, treatment, vessel) %>%
+  summarise(total_cont = max(total_cont,0))
 
+ggplot(summ2.5.df) + geom_boxplot(aes(y = total_cont, x = treatment))
 
-roi_list = summary.df %>% select(site, animal, treatment) %>% distinct()
+summ3.df = summ2.5.df %>% group_by(site, animal, treatment) %>%
+  summarise(total_cont = mean(total_cont, na.rm = TRUE))
 
+ggplot(summ3.df) + geom_boxplot(aes(y = total_cont, x = treatment))
 
-pdf("plots.pdf", onefile = TRUE, width = 12, height = 9)
+summ4.df = summ3.df %>% group_by(animal, treatment) %>%
+  summarise(total_cont = mean(total_cont, na.rm = TRUE))
 
-for (i in 1:nrow(roi_list))
-{
+ggplot(summ4.df) + geom_boxplot(aes(y = total_cont, x = treatment)) +
+  geom_point(aes(y = total_cont, x = treatment), color = "blue") +
+  scale_y_continuous(limits = c(0,NA)) +
+  labs(y = "Average Contractions", x = "Treatment")
 
-  print(i)
+ggplot(summ4.df) + geom_point(aes(y = total_cont, x = treatment)) +
+  geom_point(aes(y = total_cont, x = treatment), color = "blue") +
+  scale_y_continuous(limits = c(0,NA)) +
+  labs(y = "Average Contractions", x = "Treatment")
 
-  roi = roi_list[i,]
 
-  fulldata_mean_mini = summary.df %>% filter(site == roi$site, animal == roi$animal, treatment == roi$treatment)
+# Compute the analysis of variance
+res.aov <- aov(total_cont ~ treatment, data = summ4.df)
+# Summary of the analysis
+summary(res.aov)
 
-  video_shift = (fulldata_mean_mini %>% group_by(source_video) %>% summarise(video_shift = max(frame_id)))$video_shift
+TukeyHSD(res.aov)
 
-  theplot = ggplot(fulldata_mean_mini) +
-    geom_line(aes(x = frame_id, y = p_mean, color = vessel)) +
-    geom_vline(xintercept = video_shift) +
-    labs(title = (paste(i, ")" , roi$treatment, roi$animal, " S",roi$site, sep = "")))
-
-  grid.arrange(theplot)
-
-}
-
-dev.off()
-
-
-
-pdf("plots_smooth.pdf", onefile = TRUE, width = 12, height = 9)
-
-for (i in 1:nrow(roi_list))
-{
-
-  print(i)
-
-  roi = roi_list[i,]
-
-  fulldata_mean_mini = summary.df %>% filter(site == roi$site, animal == roi$animal, treatment == roi$treatment)
-
-
-  video_shift = (fulldata_mean_mini %>% group_by(source_video) %>% summarise(video_shift = max(frame_id)))$video_shift
-
-  theplot = ggplot(fulldata_mean_mini) +
-    geom_line(aes(x = frame_id, y = smooth, color = vessel)) +
-    geom_vline(xintercept = video_shift) +
-    labs(title = (paste(i, ")" , roi$treatment, roi$animal, " S",roi$site, sep = "")))
-
-  grid.arrange(theplot)
-
-}
-
-dev.off()
-
-
-
-
-
-pdf("plots_ecg.pdf", onefile = TRUE, width = 9, height = 12)
-
-for (i in 1:nrow(roi_list))
-{
-
-  print(i)
-
-  roi = roi_list[i,]
-
-  fulldata_mean_mini = summary.df %>% filter(site == roi$site, animal == roi$animal, treatment == roi$treatment)
-
-
-  video_shift = (fulldata_mean_mini %>% group_by(source_video) %>% summarise(video_shift = max(frame_id)))$video_shift
-
-   theplot = ggplot(fulldata_mean_mini) +
-    geom_line(aes(x = frame_id, y = smooth, color = vessel)) +
-    labs(title = (paste(i, ")" , roi$treatment, roi$animal, " S",roi$site, sep = ""))) +
-    facet_wrap(vars(vessel), ncol = 1, scales = "free_y")+
-    geom_vline(xintercept = video_shift)
-
-  grid.arrange(theplot)
-
-}
-
-dev.off()
-
-
-
-trace_list = summary.df %>% select(source_video, vessel, animal, treatment, site) %>% distinct()
-
-
-
-trace_list = trace_list[sample(c(1:nrow(trace_list)),100),]
-
-pdf("plots_points.pdf", onefile = TRUE, width = 9, height = 12)
-
-result = foreach(i = 1:nrow(trace_list)) %do%
-{
-  print(paste(i, "of", nrow(trace_list)))
-  traced = trace_list[i,]
-  trace = summary.df %>% filter(source_video == traced$source_video, vessel == traced$vessel)
-
-
-  if(sum(trace$p_mean)>5 && length(trace$p_mean)>10)
-  {
-     resulting = find_peaks(input_vector =trace$p_mean, min_change = 0)
-     resulting$source_video = traced$source_video
-     resulting$vessel = traced$vessel
-     resulting$animal = traced$animal
-     resulting$treatment = traced$treatment
-     resulting$site = traced$site
-     return(resulting)
-  }
-
-}
-
-contractions = bind_rows(result)
-
-dev.off()
-
-unique(contractions$type)
-minic = contractions %>% filter(abs(event_change)>1)
-
-
-ggplot(minic) + geom_freqpoly(aes(x = event_change, color = treatment))
-ggplot(minic) + geom_density(aes(x = event_duration, color = treatment))
-ggplot(minic) + geom_density(aes(x = event_gradient, color = treatment))
-
-minics = contractions %>% group_by(animal, site, treatment, vessel, type) %>%
-  summarise(event_change_mean = mean(abs(event_change)))
-
-ggplot(minics) + geom_point(aes(x = treatment, y = event_change_mean, color = type))
-
-minicss = minics %>% group_by(animal, site, treatment, type) %>%
-  summarise(event_change_mean = mean(event_change_mean))
-
-ggplot(minicss) + geom_point(aes(x = treatment, y = event_change_mean, color = type))
-
-minicsss = minicss %>% group_by(animal, treatment, type) %>%
-  summarise(event_change_mean = mean(event_change_mean))
-
-ggplot(minicsss) + geom_point(aes(x = treatment, y = event_change_mean, color = type))
-ggplot(minicsss) + geom_point(aes(x = treatment, y = event_change_mean, color = type))
-
-# fulldata_mean = fulldata_mean %>% filter(source_video == "image034")
-
-mean_mini_demo = filter(mean_mini, vessel == 1.2)
-
-find_peaks(input_vector = mean_mini_demo$p_width)
-
-
-
-# Bits of stuff for single file quant
-
-
-find_peaks_y(100,datum)
-find_peaks_y(200,datum)
-
-
-datum_groups = datumgood
-
-datum_groups$grouping = cut(datum_groups$y, 20)
-
-datum_groups = datum_groups %>% group_by(grouping, frame) %>% summarise(p_width = mean(p_width, na.rm = TRUE), y = mean(y))
-
-datum_groups = subset(datum_groups, !is.nan(datum_groups$p_width))
-
-ggplot(datum_groups) + geom_line(aes(x = frame, y = p_width, color = grouping))
-
-output = lapply(unique(datum_groups$y), find_peaks_y, datum_groups)
-
-outputsummary = bind_rows(output, .id = "column_label")
-
-outputsummary$column_label = as.numeric(outputsummary$column_label)
-
-ggplotly(ggplot(outputsummary) + geom_point(aes(x = event_start, y = y_location)))
-
-
-unique(outputsummary$event_start)
 
 }

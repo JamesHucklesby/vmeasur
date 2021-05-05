@@ -23,7 +23,7 @@ import_file = function(filename)
   csvfile$X = NULL
   csvfile$X.1 = NULL
   csvfile$file_id = NULL
-  csvfile$frame = extract_numeric(csvfile$filename)-1000
+  csvfile$frame = parse_number(str_remove(csvfile$filename, "test1"))
 
   # csvfile %>% select(y, excluded) %>% distinct()
   # toexclude = csvfile %>% group_by(y) %>% summarise(excluded = sum(excluded==1))
@@ -46,7 +46,7 @@ import_file = function(filename)
 
   animal_treatment = substr(animal_site,1, nchar(animal_site)-4)
 
-  csvfile$animal = parse_number(animal_treatment)
+  csvfile$animal = suppressWarnings(parse_number(animal_treatment))
   csvfile$treatment = str_remove(animal_treatment, as.character(parse_number(animal_treatment)))
 
   return(csvfile)
@@ -75,26 +75,33 @@ import_file = function(filename)
 #' # Test folder to come
 #'
 #'
-import_all_folder = function(csv_files)
+import_folder_bin = function(current_dir, y_bin = 30)
 {
 
-cl <- makeCluster(detectCores()-1)
-registerDoParallel(cl)
-iterations <- length(csv_files)
-pb <- progressBar(max = iterations, style = "ETA")
-progress <- function(n) setTxtProgressBar(pb, n)
-opts <- list(progress = progress)
-result <- foreach(i = 1:iterations, .options.snow = opts, .verbose  = FALSE) %dopar%
-  {
-      vmeasur::import_file(csv_files[[i]])
-  }
+  # list out the CSV files to import
+  folder_files = list.files(current_dir, recursive = TRUE, pattern = "\\_widths.csv$", full.names = TRUE)
 
-close(pb)
-stopCluster(cl)
+  # Import them all with lapply and combine with dplyr
+  applied = lapply(folder_files, import_file)
+  fulldata = dplyr::bind_rows(applied, .id = "file_id")
 
-fulldata = bind_rows(result, .id = "file_id")
 
-return(fulldata)
+  fulldata = fulldata %>% group_by(y, vessel, site, animal, treatment) %>%
+    mutate(frame_id = row_number())
+
+  pixel_bin = y_bin
+
+  fulldata_grouped = fulldata %>% mutate(ygroup = ((y-1) %/% pixel_bin) + 1)  %>%
+    group_by(treatment, animal, site, vessel, ygroup) %>%
+    mutate(max = max(y), min = min(y), npix = max-min +1, trace = cur_group_id()) %>%
+    filter(npix == pixel_bin) %>%
+    ungroup()
+
+  fulldata_mean = fulldata_grouped %>% filter(!excluded) %>%
+    group_by(frame_id, frame, source_video, site, animal, treatment, vessel, ygroup) %>%
+    summarise(p_mean = mean(p_width, na.rm = TRUE), p_median = median(p_width, na.rm = TRUE))
+
+  return(fulldata_mean)
 
 }
 
