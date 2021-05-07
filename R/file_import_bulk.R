@@ -75,6 +75,8 @@ import_file = function(filename)
 #' # Test folder to come
 #'
 #'
+#'current_dir = "P:\\Full Dataset 2\\SH28S1"
+#'
 import_folder_bin = function(current_dir, y_bin = 30)
 {
 

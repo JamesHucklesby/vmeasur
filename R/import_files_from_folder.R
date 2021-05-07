@@ -1,5 +1,10 @@
 function(){
 
+  library(future)
+  library(progressr)
+  library(foreach)
+  library(doFuture)
+
 csv_files = list.files("//files.auckland.ac.nz/research/ressci202000061-PROM-study/Full Dataset 2",
                        recursive = TRUE, pattern = "\\_widths.csv$", full.names = TRUE)
 
@@ -19,7 +24,7 @@ done_dirs = unique(dirname(csv_files))
 
 oldDoPar <- registerDoFuture()
 
-cl <- parallel::makeCluster(4)
+cl <- parallel::makeCluster(15)
 
 registerDoFuture() ## tell foreach to use futures
 plan("cluster", workers = cl, gc = TRUE) ## parallelize over a local PSOCK cluster
@@ -38,7 +43,7 @@ with_progress({
   p <- progressor(along = xs)
   y <- foreach(x = xs, .export = c("import_folder_bin")) %dopar% {
     fulldata_mean = import_folder_bin(x)
-    write.csv(fulldata_mean, paste(x, "/average.csv", sep = ""))
+    write.csv(fulldata_mean, paste(x, "/S",paste(unique(fulldata_mean$site), collapse = "_"),"_s_average.csv", sep = ""))
     rm(fulldata_mean)
     gc()
     p(basename(x)) ## signal a progression update
@@ -59,7 +64,7 @@ on.exit(with(oldDoPar, foreach::setDoPar(fun=fun, data=data, info=info)), add = 
 csv_files = list.files("//files.auckland.ac.nz/research/ressci202000061-PROM-study/Full Dataset 2",
                        recursive = TRUE, full.names = TRUE)
 
-summary_csv = subset(csv_files,(str_count(csv_files, "average.csv")>0))
+summary_csv = subset(csv_files,(str_count(csv_files, "_s_average.csv")>0))
 
 summary_data  = lapply(summary_csv, read.csv, as.is = TRUE)
 
@@ -72,7 +77,7 @@ for(i in c(2:length(summary_data)))
   summary.df = rbind(summary.df, summary_data[[i]])
 }
 
-vessel_list = summary.df %>% select(vessel, source_video) %>% distinct()
+vessel_list = summary.df %>% select(vessel, source_video, site) %>% distinct()
 
 
 
