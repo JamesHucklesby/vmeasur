@@ -75,6 +75,8 @@ import_file = function(filename)
 #' # Test folder to come
 #'
 #'
+#' import_folder_bin("P:\\Full Dataset 2\\\\\SH28S1")
+#'
 #'current_dir = "P:\\Full Dataset 2\\SH28S1"
 #'
 import_folder_bin = function(current_dir, y_bin = 30)
@@ -101,7 +103,9 @@ import_folder_bin = function(current_dir, y_bin = 30)
 
   fulldata_mean = fulldata_grouped %>% filter(!excluded) %>%
     group_by(frame_id, frame, source_video, site, animal, treatment, vessel, ygroup) %>%
-    summarise(p_mean = mean(p_width, na.rm = TRUE), p_median = median(p_width, na.rm = TRUE))
+    summarise(p_mean = mean(p_width, na.rm = TRUE), p_median = median(p_width, na.rm = TRUE)) %>%
+    group_by(site, animal, treatment, vessel, ygroup) %>%
+    mutate(trace_id = cur_group_id())
 
   return(fulldata_mean)
 

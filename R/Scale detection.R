@@ -1,0 +1,94 @@
+#' Calibrate the pixel size using a test image
+#'
+#' @param file_path The path to the file
+#'
+#' @return A graphical representation of
+#'
+#' @importFrom  imager load.image imrotate grabLine grabRect
+#' @importFrom  ggpubr ggarange
+#' @importFrom  ggplot2 ggplot geom_line geom_raster geom_vline theme labs
+#' @importFrom  dplyr mutate filter summarise
+#'
+#'
+#' @examples
+#' # file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
+#' # calibrate_pixel_size(file)
+#'
+calibrate_pixel_size = function(file_path = NULL)
+{
+
+if(is.null(file_path))
+{
+  standard = file.choose()
+}
+else
+{
+  standard = file_path
+}
+
+image = load.image(standard)
+
+
+image_display = pad(image, 100, "y", pos = -1) %>%
+  draw_text(10, 10, "Draw a line along the edge of the calibration scale", "white", opacity = 1, fsize = 50)
+
+result = grabLine(image_display)
+
+
+rotation = tan(abs(result['y0'] - result['y1'])/ abs(result['x0'] - result['x1'])) /(2*pi)*360
+rotated = imrotate(image, rotation) %>% pad( 100, "y", pos = -1) %>%
+  draw_text(10, 10, "Select the section containg a graded scale", "white", opacity = 1, fsize = 50)
+
+rectangle = grabRect(rotated)
+
+rotated.df = rotated %>% grayscale %>% as.data.frame()
+
+rotated_clean = rotated.df %>% filter(x<rectangle["x1"], y<rectangle["y1"]) %>%
+  filter(x>rectangle["x0"], y>rectangle["y0"]) %>%
+  mutate(x = x-min(x)+1, y = y-min(y)+1)
+
+# rotated_clean %>% as.cimg() %>% plot()
+
+
+
+
+grouped = rotated_clean %>% group_by(x) %>% summarise(luminance = mean(value))
+ggplot(grouped) + geom_line(aes(x = x, y = luminance))
+
+
+      output = as.vector(acf(grouped$luminance, lag.max = length(grouped$luminance))$acf)
+
+      data.df = data.frame(lag = c(1:length(output)), reading = output)
+
+      res = data.df %>% ungroup() %>% mutate(previous = lag(reading)) %>%
+        mutate(switch = (reading<0 & previous>0)) %>%
+        filter(switch) %>%
+        mutate(lagz = lag-min(lag)) %>%
+        mutate(lagd = lag - lag(lag)) %>%
+        mutate(residual = lagz %% median(lagd, na.rm = TRUE))
+
+      detected_pixels = median(res$lagd, na.rm = TRUE)
+
+      p1 = ggplot(rotated_clean) + geom_raster(aes(x = x, y = y, fill = value)) +
+        scale_y_continuous(trans=scales::reverse_trans()) +
+        scale_fill_gradient(low="black",high="white") +
+        geom_vline(xintercept = res$lag, color = "blue") +
+        theme(legend.position = "none") +
+        labs(x = "X position (pixels)", y = "Y position (pixels)", title = "Calibration area selected")
+
+      p2 = ggplot(grouped) + geom_line(aes(x = x, y = luminance)) +
+        geom_vline(xintercept = res$lag, color = "blue") +
+        labs(x = "X position (pixels)", y = "Average Luminance", title = paste("Fitted scale: ", detected_pixels, "px"))
+
+      plotreturn = ggarrange(p1,p2, ncol = 1)
+
+      cat(paste("Pixels between scale gradations:", detected_pixels))
+      cat("\n")
+      cat(paste("Gradation units/pixel:", 1/detected_pixels))
+      cat("\n")
+
+      return(plotreturn)
+
+
+}
+

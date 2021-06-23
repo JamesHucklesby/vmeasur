@@ -71,6 +71,8 @@ for(i in c(1:nrow(trace_table)))
 
   dat = list()
 
+
+
   dat["max_EF"] = max(nullo(output$baseline_change))
   dat["mean_EF"] = mean(nullo(output$baseline_change))
   dat["median_EF"] = median(nullo(output$baseline_change))
@@ -105,6 +107,18 @@ for(i in c(1:nrow(trace_table)))
   dat["median_duration"] = median(nullo(output$event_duration))
   dat["sum_duration"] = sum(nullo(output$event_duration))
   dat["sd_duration"] = sd(nullo(output$event_duration))
+
+  dat["max_cont_duration"] = max(nullo(output$cont_duration))
+  dat["mean_cont_duration"] = mean(nullo(output$cont_duration))
+  dat["median_cont_duration"] = median(nullo(output$cont_duration))
+  dat["sum_cont_duration"] = sum(nullo(output$cont_duration))
+  dat["sd_cont_duration"] = sd(nullo(output$cont_duration))
+
+  dat["max_fill_duration"] = max(nullo(output$fill_duration))
+  dat["mean_fill_duration"] = mean(nullo(output$fill_duration))
+  dat["median_fill_duration"] = median(nullo(output$fill_duration))
+  dat["sum_fill_duration"] = sum(nullo(output$fill_duration))
+  dat["sd_fill_duration"] = sd(nullo(output$fill_duration))
 
   dat["max_gradient"] = max(nullo(output$event_gradient))
   dat["mean_gradient"] = mean(nullo(output$event_gradient))
