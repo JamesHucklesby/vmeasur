@@ -57,27 +57,17 @@ import_file = function(filename)
 
 #' Parallel mass csv import code
 #'
-#' @param csv_files list of csv files to import
+#' @param current_dir list of csv files to import
+#' @param y_bin number of pixels to put in each ybin
 #'
-#' @importFrom parallel makeCluster stopCluster
-#' @importFrom parallel detectCores
-#' @importFrom doParallel registerDoParallel
-#' @importFrom pbmcapply progressBar
-#' @importFrom utils setTxtProgressBar
-#' @importFrom foreach `%dopar%` foreach
+#'
+#' @importFrom dplyr row_number
 #'
 #' @return A bulk list of imported csv files
 #'
 #' @export
 #'
 #' @examples
-#'
-#' # Test folder to come
-#'
-#'
-#' import_folder_bin("P:\\Full Dataset 2\\\\\SH28S1")
-#'
-#'current_dir = "P:\\Full Dataset 2\\SH28S1"
 #'
 import_folder_bin = function(current_dir, y_bin = 30)
 {
@@ -102,9 +92,9 @@ import_folder_bin = function(current_dir, y_bin = 30)
     ungroup()
 
   fulldata_mean = fulldata_grouped %>% filter(!excluded) %>%
-    group_by(frame_id, frame, source_video, site, animal, treatment, vessel, ygroup) %>%
+    group_by(`frame_id`, `frame`, `source_video`, `site`, `animal`, `treatment`, `vessel`, `ygroup`) %>%
     summarise(p_mean = mean(p_width, na.rm = TRUE), p_median = median(p_width, na.rm = TRUE)) %>%
-    group_by(site, animal, treatment, vessel, ygroup) %>%
+    group_by(`site`, `animal`, `treatment`, `vessel`, `ygroup`) %>%
     mutate(trace_id = cur_group_id())
 
   return(fulldata_mean)

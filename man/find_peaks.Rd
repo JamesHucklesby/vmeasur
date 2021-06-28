@@ -21,6 +21,10 @@ find_peaks(
 \item{nups}{number of increases before and after the dataset to threshold on}
 
 \item{min_change}{minimum size of change to be termed significant}
+
+\item{min_dist}{Minimum distance between the minima}
+
+\item{plot}{should a plot be returned along with the detected peaks}
 }
 \value{
 A vector of peaks detected

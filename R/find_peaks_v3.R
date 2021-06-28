@@ -4,12 +4,15 @@
 #' @param kband K smoothing window to apply to the data
 #' @param nups number of increases before and after the dataset to threshold on
 #' @param min_change minimum size of change to be termed significant
+#' @param min_dist Minimum distance between the minima
+#' @param plot should a plot be returned along with the detected peaks
 #'
 #' @importFrom stats ksmooth time
 #' @importFrom pracma findpeaks
 #' @importFrom graphics grid points
 #' @importFrom magrittr %>%
-#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate rowwise cur_group_id
+#' @importFrom ggplot2 aes geom_point
 #'
 #'
 #'
@@ -67,7 +70,7 @@ find_peaks = function(input_vector, kband = 30, nups = 10, min_change = 0.25, mi
 
   #events = subset(events, !events$event_end == length(input_vector) & !events$event_start == 1)
 
-  events = events %>% filter(abs(baseline_change)>min_change) %>% filter(event_duration>min_dist)
+  events = events %>% filter(abs(`baseline_change`)>min_change) %>% filter(`event_duration`>min_dist)
 
   if(nrow(events) ==0)
   {
@@ -82,10 +85,10 @@ find_peaks = function(input_vector, kband = 30, nups = 10, min_change = 0.25, mi
     geom_line(aes(x = c(1:length(smooth_vector)), y = smooth_vector, color = "Smoothed")) +
     # geom_point(data = raw_events, aes(x = event_start, y = start_value, color = "Event Start")) +
     # geom_point(data = raw_events, aes(x = event_end, y = end_value, color = "Event end")) +
-    geom_point(data = raw_events, aes(x = event_maxima, y = max_value, color = "Events found and ignored"))+
-    geom_point(data = events, aes(x = event_maxima, y = max_value, color = "Event minima"), size = 2) +
-    geom_point(data = events, aes(x = event_start, y = start_value, color = "Event Start"), size = 3) +
-    geom_point(data = events, aes(x = event_end, y = end_value, color = "Event end"), size = 2)
+    geom_point(data = raw_events, aes(x = `event_maxima`, y = `max_value`, color = "Events found and ignored"))+
+    geom_point(data = events, aes(x = `event_maxima`, y = `max_value`, color = "Event minima"), size = 2) +
+    geom_point(data = events, aes(x = `event_start`, y = `start_value`, color = "Event Start"), size = 3) +
+    geom_point(data = events, aes(x = `event_end`, y = `end_value`, color = "Event end"), size = 2)
 
   return(list(function_plot, events))
 

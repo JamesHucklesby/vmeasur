@@ -7,7 +7,9 @@
 import_folder_bin(current_dir, y_bin = 30)
 }
 \arguments{
-\item{csv_files}{list of csv files to import}
+\item{current_dir}{list of csv files to import}
+
+\item{y_bin}{number of pixels to put in each ybin}
 }
 \value{
 A bulk list of imported csv files
@@ -16,12 +18,5 @@ A bulk list of imported csv files
 Parallel mass csv import code
 }
 \examples{
-
-# Test folder to come
-
-
-import_folder_bin("P:\\\\Full Dataset 2\\\\\\\\\SH28S1")
-
-current_dir = "P:\\\\Full Dataset 2\\\\SH28S1"
 
 }

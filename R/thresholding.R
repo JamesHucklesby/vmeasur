@@ -108,9 +108,6 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 #'
 #' @return Saves the quantified CSV and overlaid video in the same directory as the video
 #'
-#' @importFrom parallel makeCluster stopCluster
-#' @importFrom doParallel registerDoParallel
-#' @importFrom pbmcapply progressBar
 #' @importFrom utils setTxtProgressBar  write.csv read.csv
 #' @importFrom foreach `%dopar%` foreach
 #' @importFrom tools file_path_sans_ext
@@ -155,13 +152,6 @@ else
   file_list = list.files(temp_path, full.names = TRUE, pattern = "\\.png$")
 }
 
-cl <- makeCluster(16)
-registerDoParallel(cl)
-iterations <- length(file_list)
-pb <- progressBar(min = 0, max = iterations, initial = 0, style = "ETA", substyle = NA,
-                  char = "=", width = NA, file = "")
-progress <- function(n) setTxtProgressBar(pb, n)
-opts <- list(progress = progress)
 
 result <- foreach(i = file_list, .combine = rbind,
                   .options.snow = opts, .export = "threshold_image") %dopar%
@@ -178,8 +168,6 @@ result <- foreach(i = file_list, .combine = rbind,
     utils::write.csv(processed_image[[2]], save_csv_path)
   }
 
-close(pb)
-stopCluster(cl)
 
 file_list = list.files(temp_path, full.names = TRUE, pattern = "\\overlaid.png$")
 av::av_encode_video(file_list, output = paste(temp_path, "/overlaid.avi", sep = ""),codec = "libx264", verbose = 24)

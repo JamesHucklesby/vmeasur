@@ -5,9 +5,11 @@
 #' @return A graphical representation of
 #'
 #' @importFrom  imager load.image imrotate grabLine grabRect
-#' @importFrom  ggpubr ggarange
-#' @importFrom  ggplot2 ggplot geom_line geom_raster geom_vline theme labs
-#' @importFrom  dplyr mutate filter summarise
+#' @importFrom  ggpubr ggarrange
+#' @importFrom  ggplot2 ggplot geom_line geom_raster geom_vline theme labs aes scale_y_continuous scale_fill_gradient
+#' @importFrom  dplyr mutate filter summarise lag
+#' @importFrom  stats acf median
+#' @importFrom  imager draw_text grayscale
 #'
 #'
 #' @examples
@@ -60,23 +62,23 @@ ggplot(grouped) + geom_line(aes(x = x, y = luminance))
 
       data.df = data.frame(lag = c(1:length(output)), reading = output)
 
-      res = data.df %>% ungroup() %>% mutate(previous = lag(reading)) %>%
-        mutate(switch = (reading<0 & previous>0)) %>%
-        filter(switch) %>%
-        mutate(lagz = lag-min(lag)) %>%
-        mutate(lagd = lag - lag(lag)) %>%
-        mutate(residual = lagz %% median(lagd, na.rm = TRUE))
+      res = data.df %>% ungroup() %>% mutate(`previous` = lag(reading)) %>%
+        mutate(switch = (`reading`<0 & `previous`>0)) %>%
+        filter(`switch`) %>%
+        mutate(`lagz` = `lag`-min(`lag`)) %>%
+        mutate(`lagd` = `lag` - lag(`lag`)) %>%
+        mutate(`residual` = `lagz` %% median(`lagd`, na.rm = TRUE))
 
       detected_pixels = median(res$lagd, na.rm = TRUE)
 
-      p1 = ggplot(rotated_clean) + geom_raster(aes(x = x, y = y, fill = value)) +
+      p1 = ggplot(rotated_clean) + geom_raster(aes(x = `x`, y = `y`, fill = `value`)) +
         scale_y_continuous(trans=scales::reverse_trans()) +
         scale_fill_gradient(low="black",high="white") +
         geom_vline(xintercept = res$lag, color = "blue") +
         theme(legend.position = "none") +
         labs(x = "X position (pixels)", y = "Y position (pixels)", title = "Calibration area selected")
 
-      p2 = ggplot(grouped) + geom_line(aes(x = x, y = luminance)) +
+      p2 = ggplot(grouped) + geom_line(aes(x = `x`, y = `luminance`)) +
         geom_vline(xintercept = res$lag, color = "blue") +
         labs(x = "X position (pixels)", y = "Average Luminance", title = paste("Fitted scale: ", detected_pixels, "px"))
 
