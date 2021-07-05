@@ -10,8 +10,12 @@ quantify_folders(working_folder = choose.dir())
 \item{working_folder}{The folder containing the completed analysis}
 }
 \value{
-
+saves a pdf of a series of quantified folders in the root directory
 }
 \description{
 Quantify multiple animals at the same time
+}
+\examples{
+# Used interactivley only
+
 }

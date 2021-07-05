@@ -15,7 +15,6 @@
 #' @importFrom magrittr %>%
 #' @importFrom crayon green
 #' @importFrom svDialogs dlg_input
-
 #'
 #'
 #' @examples
@@ -139,7 +138,7 @@ draw_rect(rotated,xstart,ystart,xstart+xlength, ystart+ylength,color="green",opa
 
 print(paste("File name is:", video_name))
 
-roi_name = dlg_input("Enter ROI Name?", "")$res
+roi_name = make_filename(list = collect_filename(video = video_name))
 
 
 video_path = gsub("\\\\", "/", video_path)
@@ -155,7 +154,6 @@ variables = paste("threshold = '",overallthreshold,"',",
 
 
 function_string = paste("threshold_apply(",variables,")")
-writeClipboard(function_string)
 
 function_string = paste("\n", function_string, "\n ")
 

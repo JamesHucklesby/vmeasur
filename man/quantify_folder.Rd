@@ -4,14 +4,21 @@
 \alias{quantify_folder}
 \title{Quantify all ROI in a single folder}
 \usage{
-quantify_folder(folder)
+quantify_folder(folder, kband = 40)
 }
 \arguments{
-\item{folder}{The folser to quantify}
+\item{folder}{The folder to quantify}
+
+\item{kband}{The k value to use in smoothing the data}
 }
 \value{
-
+Saves a PDF file of the analyasis generated
 }
 \description{
 Quantify all ROI in a single folder
+}
+\examples{
+# Select a folder and it will be quantified
+
+
 }

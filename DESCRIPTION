@@ -5,8 +5,11 @@ Version: 0.1.0
 Authors@R: person("James", "Hucklesby", email = "jhuc964@aucklanduni.ac.nz",
                   role = c("aut", "cre"))
 Maintainer: James Hucklesby <jhuc964@aucklanduni.ac.nz>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: vmeasur contains a variety of tools to allow the quantificaiton of videos
+    taken under an operating microscope. Lymphatic vessels that have been injected with 
+    a variety of blue dyes can be tracked to determine their widths. Code is optimised
+    for efficent proccessing of multiple large video files. Functions to generate graphs
+    are also included.
 License: CC BY-NC-SA 4.0
 Imports: ggplot2, readr, stringr, tidyr, purrr, ggpubr,
           imager, av, tools, dplyr, rlang, foreach, magrittr,

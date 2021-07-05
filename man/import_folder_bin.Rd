@@ -18,5 +18,6 @@ A bulk list of imported csv files
 Parallel mass csv import code
 }
 \examples{
+# Not applicable to CRAN
 
 }

@@ -11,10 +11,10 @@
 #' @importFrom imager load.image imsplit clean parany
 #' @importFrom dplyr summarise group_by
 #' @importFrom magrittr `%>%`
+#' @importFrom purrr discard
 #'
 #' @export
-#'
-#' @importFrom purrr discard
+
 #'
 #' @examples
 #' # No examples
@@ -25,6 +25,8 @@ threshold_image <- function(file_path, threshold, min_area = 100)
   # Load the image and split it into it's channels
   im <- imager::load.image(file_path)
   im.c = imager::imsplit(im,"c")[[1]]
+
+  plot(im.c)
 
   # Histogram plot if needed for debugging
   #hist(as.data.frame(im.c)$value)
@@ -49,7 +51,7 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 
   if(length(pxconn)>1)
   {
-    region =  pxconn %>% imager::parany %>% plot
+    region =  pxconn %>% parany %>% plot
   } else
   {
     region = px
@@ -66,7 +68,7 @@ threshold_image <- function(file_path, threshold, min_area = 100)
   # Superimpose the two searches to find any overlap
   overlaid_regions = region+maximal
 
-  # Combine the data into a visualisation
+  # Combine the data into a visualization
   boundary_lines = imager::imappend(imager::imlist(imager::boundary(region)==2,imager::boundary(region), maximal), "c")
   imagelist = imager::imlist(imager::as.cimg(boundary_lines), im)
   overlap_image = imager::parmax(imagelist)
@@ -113,6 +115,7 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 #' @importFrom tools file_path_sans_ext
 #' @importFrom magrittr `%>%`
 #' @importFrom imager as.cimg
+#' @importFrom doFuture registerDoFuture
 #'
 #'
 #' @export
@@ -128,7 +131,7 @@ threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = 'ima
 directory = scratch_dir()
 video_folder = dirname(video_path)
 
-video_name = paste(basename(tools::file_path_sans_ext(video_path)),"_",roi_name, sep = "")
+video_name = roi_name
 
 
 
@@ -146,15 +149,22 @@ else
                         "crop=",xlength,":",ylength,":",xstart,":",ystart,"",
                         sep = "")
 
-  av::av_encode_video(video_path, paste(temp_path, "/test1w%03d.png", sep = ""), vfilter = filter_string, codec = "png")
+  av::av_encode_video(video_path, paste(temp_path, "/%03d.png", sep = ""), vfilter = filter_string, codec = "png")
 
 
   file_list = list.files(temp_path, full.names = TRUE, pattern = "\\.png$")
 }
 
 
-result <- foreach(i = file_list, .combine = rbind,
-                  .options.snow = opts, .export = "threshold_image") %dopar%
+
+
+  registerDoFuture()
+  plan(multisession)
+
+  options(future.rng.onMisuse = "ignore")
+
+
+result <- foreach(i = file_list, .combine = rbind) %dopar%
   {
 
     processed_image = vmeasur::threshold_image(i, threshold)
@@ -169,6 +179,7 @@ result <- foreach(i = file_list, .combine = rbind,
   }
 
 
+
 file_list = list.files(temp_path, full.names = TRUE, pattern = "\\overlaid.png$")
 av::av_encode_video(file_list, output = paste(temp_path, "/overlaid.avi", sep = ""),codec = "libx264", verbose = 24)
 
@@ -178,8 +189,10 @@ df.final <- do.call("rbind", ldf)
 
 write.csv(df.final, paste(temp_path, "/widths.csv", sep = ""))
 
-file.copy(paste(temp_path, "/overlaid.avi", sep = ""), paste(video_folder,"/",video_name,"_overlaid.avi", sep = ""))
-file.copy(paste(temp_path, "/widths.csv", sep = ""), paste(video_folder,"/",video_name,"_widths.csv", sep = ""))
+dir.create(paste(video_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", sep = ""))
+
+file.copy(paste(temp_path, "/overlaid.avi", sep = ""), paste(video_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/",video_name,"_overlaid.avi", sep = ""))
+file.copy(paste(temp_path, "/widths.csv", sep = ""), paste(video_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", video_name,"_widths.csv", sep = ""))
 
 unlink(temp_path, recursive = TRUE)
 
