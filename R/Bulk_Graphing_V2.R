@@ -7,6 +7,7 @@
 #' @importFrom progressr handlers handler_progress with_progress progressor
 #' @importFrom foreach foreach %dopar%
 #' @importFrom progressr progressor handlers
+#' @importFrom tcltk tk_choose.dir
 #'
 #' @return saves a pdf of a series of quantified folders in the root directory
 #'
@@ -15,7 +16,7 @@
 #' @examples
 #' # Used interactivley only
 #'
-quantify_folders = function(working_folder = choose.dir())
+quantify_folders = function(working_folder = tk_choose.dir())
 {
 
 folders_to_process = list.dirs(working_folder, recursive = FALSE)
@@ -58,7 +59,7 @@ with_progress({
 #' @importFrom ggplot2 aes facet_wrap ggsave
 #' @importFrom readr write_csv
 #' @importFrom dplyr select distinct
-#' @importFrom utils choose.dir
+#' @importFrom tcltk tk_choose.dir
 #'
 #'
 #' @examples

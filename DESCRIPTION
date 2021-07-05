@@ -1,20 +1,20 @@
 Package: vmeasur
 Type: Package
 Title: Quantify Vessels Videoed under an Operating Microscope
-Version: 0.1.0
+Version: 0.1.2
 Authors@R: person("James", "Hucklesby", email = "jhuc964@aucklanduni.ac.nz",
                   role = c("aut", "cre"))
 Maintainer: James Hucklesby <jhuc964@aucklanduni.ac.nz>
-Description: vmeasur contains a variety of tools to allow the quantificaiton of videos
+Description: A variety of tools to allow the quantification of videos
     taken under an operating microscope. Lymphatic vessels that have been injected with 
     a variety of blue dyes can be tracked to determine their widths. Code is optimised
-    for efficent proccessing of multiple large video files. Functions to generate graphs
+    for efficient processing of multiple large video files. Functions to generate graphs
     are also included.
 License: CC BY-NC-SA 4.0
 Imports: ggplot2, readr, stringr, tidyr, purrr, ggpubr,
           imager, av, tools, dplyr, rlang, foreach, magrittr,
             graphics, stats, utils, pracma,  crayon,  svDialogs, 
-            pdftools, doFuture, progressr, future, scales
+            pdftools, doFuture, progressr, future, scales, tcltk
 Encoding: UTF-8
-LazyData: true
+LazyData: false
 RoxygenNote: 7.1.1

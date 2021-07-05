@@ -4,7 +4,7 @@
 \alias{quantify_folders}
 \title{Quantify multiple animals at the same time}
 \usage{
-quantify_folders(working_folder = choose.dir())
+quantify_folders(working_folder = tk_choose.dir())
 }
 \arguments{
 \item{working_folder}{The folder containing the completed analysis}
