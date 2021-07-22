@@ -98,6 +98,66 @@ import_folder_bin = function(current_dir, y_bin = 30)
 
 
 
+#' Title
+#'
+#' @param file_location
+#' @param y_bin
+#' @param raw
+#'
+#' @return
+#' @export
+#'
+#' @examples
+import_file_bin = function(file_location, y_bin = 30, raw = FALSE)
+{
 
+    fulldata = import_file(file_location)
+
+
+  fulldata = fulldata %>% group_by(y, roi, animal, treatment, video) %>%
+    mutate(frame_id = row_number())
+
+  pixel_bin = y_bin
+
+  fulldata_grouped = fulldata %>% mutate(ygroup = ((y-1) %/% pixel_bin) + 1)  %>%
+    group_by(treatment, animal, roi, ygroup) %>%
+    mutate(max = max(y), min = min(y), npix = max-min +1, trace = cur_group_id()) %>%
+    filter(npix == pixel_bin) %>%
+    ungroup()
+
+  if(isTRUE(raw))
+  {
+    return(fulldata_grouped)
+  }
+
+  fulldata_mean = summarise_import_file_bin(fulldata_grouped, file_location)
+
+
+  return(fulldata_mean)
+
+}
+
+
+
+#' Title
+#'
+#' @param fulldata_grouped
+#'
+#' @return
+#' @export
+#'
+#' @examples
+summarise_import_file_bin = function(fulldata_grouped, file_location)
+{
+  toreturn = fulldata_grouped %>% filter(!excluded) %>%
+    group_by(`frame_id`, `video`, `animal`, `treatment`, `roi`, `ygroup`) %>%
+    summarise(p_mean = mean(p_width, na.rm = TRUE), p_median = median(p_width, na.rm = TRUE)) %>%
+    group_by(`animal`, `treatment`, `roi`, `ygroup`) %>%
+    mutate(trace_id = cur_group_id())
+
+  toreturn$filename = basename(file_location)
+
+  return(toreturn)
+}
 
 

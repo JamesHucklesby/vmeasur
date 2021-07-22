@@ -16,7 +16,7 @@ A graphical representation of
 Calibrate the pixel size using a test image
 }
 \examples{
-# file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
-# calibrate_pixel_size(file)
+file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
+calibrate_pixel_size(file)
 
 }

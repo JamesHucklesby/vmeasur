@@ -24,7 +24,7 @@
 #' i = 1
 #' # Test to come
 #'
-find_peaks = function(input_vector, kband = 30, nups = 10, min_change = 0.25, min_dist = 10, plot = FALSE)
+find_contraction_events = function(input_vector, kband = 30, nups = 10, min_change = 0.25, min_dist = 10, plot = FALSE, pixel_scale = 73, time_scale = 22.5)
 {
 
   smooth_vector = ksmooth(time(1:length(input_vector)), input_vector, 'normal', bandwidth = kband)$y
@@ -81,14 +81,24 @@ find_peaks = function(input_vector, kband = 30, nups = 10, min_change = 0.25, mi
   if(isFALSE(plot))
   {
 
-  function_plot = ggplot() + geom_line(aes(x = c(1:length(smooth_vector)), y = input_vector, color = "a"), color = "grey", alpha = 0.8) +
-    geom_line(aes(x = c(1:length(smooth_vector)), y = smooth_vector, color = "Smoothed")) +
+    gg_color_hue <- function(n) {
+      hues = seq(15, 375, length = n + 1)
+      hcl(h = hues, l = 65, c = 100)[1:n]
+    }
+
+    colour_fill = gg_color_hue(5)
+
+  function_plot = ggplot() + geom_line(aes(x = (c(1:length(smooth_vector)))/time_scale, y = input_vector/pixel_scale, color = "Raw Data")) +
+    geom_line(aes(x = c(1:length(smooth_vector))/time_scale, y = smooth_vector/pixel_scale, color = "Smoothed"), alpha = 0.8) +
     # geom_point(data = raw_events, aes(x = event_start, y = start_value, color = "Event Start")) +
     # geom_point(data = raw_events, aes(x = event_end, y = end_value, color = "Event end")) +
-    geom_point(data = raw_events, aes(x = `event_maxima`, y = `max_value`, color = "Events found and ignored"))+
-    geom_point(data = events, aes(x = `event_maxima`, y = `max_value`, color = "Event minima"), size = 2) +
-    geom_point(data = events, aes(x = `event_start`, y = `start_value`, color = "Event Start"), size = 3) +
-    geom_point(data = events, aes(x = `event_end`, y = `end_value`, color = "Event end"), size = 2)
+    geom_point(data = raw_events, aes(x = `event_maxima`/time_scale, y = `max_value`/pixel_scale, color = "Events found and excluded"))+
+    geom_point(data = events, aes(x = `event_maxima`/time_scale, y = `max_value`/pixel_scale, color = "Event minima"), size = 2) +
+    geom_point(data = events, aes(x = `event_start`/time_scale, y = `start_value`/pixel_scale, color = "Event Start"), size = 4) +
+    geom_point(data = events, aes(x = `event_end`/time_scale, y = `end_value`/pixel_scale, color = "Event end"), size = 2) +
+    scale_color_manual(values = c(colour_fill[1:4], "gray30", colour_fill[5]))
+
+  function_plot = function_plot + labs(y = "Mean Diameter (mm)", x = "Time (s)", colour = "Tracking property")
 
   return(list(function_plot, events))
 
@@ -96,5 +106,41 @@ find_peaks = function(input_vector, kband = 30, nups = 10, min_change = 0.25, mi
 
 
   return(events)
+}
+
+
+#' Title
+#'
+#' @param widths_file
+#' @param pixel_scale
+#'
+#' @return
+#' @export
+#'
+#' @examples
+quantify_mean_width = function(widths_file, pixel_scale = 73)
+{
+
+  if(is.data.frame(widths_file))
+  {
+    width_data = widths_file
+  }
+  else
+  {
+    width_data = import_file(widths_file)
+  }
+
+  width_data_summary = width_data %>% group_by(filename) %>% summarise(mean_diameter = mean(p_width, na.rm = TRUE), sd_diameter = sd(p_width, na.rm = TRUE))
+
+  width_data_summary = width_data_summary %>% arrange(as.numeric(filename))
+
+  events_returned =  find_contraction_events(width_data_summary$mean_diameter, kband = 20)
+
+  events_returned[[3]] = calculate_physiological(events_returned[[2]])
+
+  events_returned[[4]] = width_data
+
+  return(events_returned)
+
 }
 

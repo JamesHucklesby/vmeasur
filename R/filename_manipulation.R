@@ -40,11 +40,8 @@ make_filename = function(animal = "NS", treatment = "NS", video = "NS", roi = "N
 #' @importFrom stringr str_replace
 #' @importFrom tidyr separate
 #'
-#' @examples
+#' @noRd
 #'
-#' # broken = break_filename(filename)
-#'
-#' # make_filename(list = broken)
 break_filename = function(filename)
 {
   working_filename = file_path_sans_ext(basename(filename))

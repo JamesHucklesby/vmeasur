@@ -190,13 +190,21 @@ unlink(quant_folder)
 #' #plot_heatmap(heatmap_file)
 plot_heatmap = function(heatmap_file)
 {
-  heatmap_data = read.csv(heatmap_file)
 
-  heatmap = (ggplot(heatmap_data) + geom_raster(aes(x = as.numeric(filename), y = y, fill = p_width)) +
+  if(is.data.frame(heatmap_file))
+  {
+    heatmap_data = heatmap_file
+  } else {
+  heatmap_data = read.csv(heatmap_file)
+  }
+
+  heatmap_data$frame_id = as.numeric(heatmap_data$filename)
+
+  heatmap = (ggplot(heatmap_data) + geom_raster(aes(x = as.numeric(frame_id)/22.8, y = y/73, fill = p_width)) +
     scale_y_reverse(expand = c(0,0))+
     scale_x_continuous(expand=c(0,0))+
-    labs(y = "Vessel Position (pixels from top of image)", x = "Frame", fill = "Vessel Diameter (pixels)") +
-    scale_fill_gradient(low = "white", high = "blue"))
+    labs(y = "Vessel Position (mm from top of image)", x = "Time (s)", fill = "Vessel \n Diameter (mm)") +
+    scale_fill_viridis_c())
 
   return(heatmap)
 }
@@ -223,9 +231,132 @@ plot_line = function(widths_file)
 
   width_data_summary = width_data %>% group_by(filename) %>% summarise(mean_diameter = mean(p_width, na.rm = TRUE), sd_diameter = sd(p_width, na.rm = TRUE))
 
-  heatmap = ggplot(width_data_summary) + geom_line(aes(x = as.numeric(filename), y = mean_diameter))
+  heatmap = ggplot(width_data_summary) + geom_line(aes(x = as.numeric(filename)/22.8, y = mean_diameter))
 
   return(heatmap)
 }
 
+
+#' Title
+#'
+#' @param file
+#'
+#' @return
+#' @export
+#'
+#' @examples
+plot_line_ygroup = function(file)
+{
+
+  var1 = import_file_bin(file)
+
+
+
+  return(pc)
+}
+
+
+#' Title
+#'
+#' @param widths_file
+#'
+#' @return
+#' @export
+#'
+#' @examples
+quantify_width_position = function(widths_file)
+{
+
+  width_data = read.csv(widths_file)
+
+  # Fig A
+  pa = plot_heatmap(width_data)
+  pa
+
+  # Fig B
+
+  width_summ = width_data %>% group_by(y) %>% summarise(range = max(p_width) - min(p_width), sd = sd(p_width))
+
+  vlines = data.frame(xintercept = c(1:11)*30/73, colour = "blue3")
+
+  pb = ggplot(width_summ) + geom_line(aes(x = y/73, y = range/73, color = "Vessel Width")) + coord_flip() + scale_x_reverse() +
+    geom_vline(aes(xintercept = xintercept, color = "Regions selected"), data= vlines) +
+    labs(y = "Maximum change in diameter (mm)", x = "Vessel Position (mm from top of image)", color = "Legend")
+
+  return(list(pa, pb))
+
+}
+
+
+#' Title
+#'
+#' @param widths_file
+#'
+#' @return
+#' @export
+#'
+#' @examples
+quanitfy_mean_width_sections = function(widths_file)
+{
+
+  widths_binned = import_file_bin(widths_file, raw = TRUE)
+
+
+  bins = unique(widths_binned$ygroup)
+
+
+  result = foreach(bin = bins) %do%
+    {
+      local_widths = widths_binned %>% filter(ygroup == bin)
+      quantify_mean_width(local_widths)
+    }
+
+  contraction_detection = sapply(result, "[", 2) %>% bind_rows(.id = "ygroup")
+  contraction_phys = sapply(result, "[", 3) %>% bind_rows(.id = "ygroup")
+  raw_data = sapply(result, "[", 4) %>% bind_rows(.id = "ygroup")
+
+
+  widths_binned_summary = summarise_import_file_bin(widths_binned, "TEST")
+
+  var2 = widths_binned_summary %>% group_by(trace_id) %>% mutate(max_range = max(p_mean)-min(p_mean)) %>%
+    group_by(roi) %>% mutate(maxcont = max_range == max(max_range))
+
+  # Plot out that data
+  pc = ggplot(var2) + geom_line(aes(x = frame_id/22.8, y = p_mean/73, color = as.factor(paste(round(ygroup*30/73,2)-0.41, "to", round(ygroup*30/73,2), "mm")))) +
+    labs(x = "Time (s)", y = "Mean Diameter (mm)", color = "Vessel Section")
+
+  # Generate contraction background data
+
+  contraction = contraction_detection
+
+  contraction$source_file = as.numeric(contraction$ygroup)
+
+
+  pe = ggplot(contraction) + geom_point(aes(baseline_change/73, (source_file*30-15)/73, color = event_maxima/22.5), size = 2, alpha = 0.7) + scale_y_reverse() +
+    labs(x = "Contraction Amplitude (mm)", y = "Distance from top of image (mm)", color = "Time at \n maximal \n contraction (s)") +
+    scale_color_continuous(limits = c(0,30), type = "viridis") + guides(colour = guide_colorbar(reverse=T, min = 0, max = 30))
+
+
+  cont_lab = contraction %>% group_by(source_file) %>% arrange(event_start) %>%
+    mutate(cont_id = match(event_start, cur_data()[["event_start"]]))
+
+
+  pf = ggplot(cont_lab) + geom_point(aes(baseline_change/73, event_duration/22.8, color = as.factor(paste(round(as.numeric(ygroup)*30/73,2)-0.41, "to", round(as.numeric(ygroup)*30/73,2), "mm")), shape = as.factor(cont_id)), size = 3) +
+    labs(shape = "Contraction\n number", x = "Contraction Amplitude (mm)", y = "Contraction Duration (s)", color = "Vessel Section") +
+    scale_shape_manual(values = c(1,0,3,10))
+
+
+
+
+  heatmap = quantify_width_position(widths_file)[[1]]
+  pd = heatmap + geom_point(aes(x = event_maxima/22.8, y =  (source_file*30-15)/73, size = baseline_change), data = contraction, color = "white") +
+    geom_errorbar(aes(xmin = event_start/22.8, xmax = event_end/22.8, y = (source_file*30-15)/73, linetype = "Contraction \n Duration"), color = "white", data = contraction) +
+    scale_y_reverse(expand=c(0,0)) +
+    scale_x_continuous(expand=c(0,0))+
+    labs(size = "Contraction \n amplitude", linetype = "") +
+    theme(legend.key = element_rect(fill = "black"))
+
+  return(list(pc, pe, pf, pd, contraction_detection, contraction_phys))
+
+}
 

@@ -13,8 +13,8 @@
 #'
 #'
 #' @examples
-#' # file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
-#' # calibrate_pixel_size(file)
+#' file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
+#' calibrate_pixel_size(file)
 #'
 calibrate_pixel_size = function(file_path = NULL)
 {
@@ -71,6 +71,14 @@ ggplot(grouped) + geom_line(aes(x = x, y = luminance))
 
       detected_pixels = median(res$lagd, na.rm = TRUE)
 
+      rotated_to_plot = filter(rotated.df, y>100)
+
+      p0 = ggplot(rotated_to_plot) + geom_raster(aes(x = `x`, y = `y`, fill = `value`)) +
+        scale_y_continuous(trans=scales::reverse_trans()) +
+        scale_fill_gradient(low="black",high="white") +
+        theme(legend.position = "none") +
+        labs(x = "X position (pixels)", y = "Y position (pixels)", title = "Calibration Image")
+
       p1 = ggplot(rotated_clean) + geom_raster(aes(x = `x`, y = `y`, fill = `value`)) +
         scale_y_continuous(trans=scales::reverse_trans()) +
         scale_fill_gradient(low="black",high="white") +
@@ -82,7 +90,7 @@ ggplot(grouped) + geom_line(aes(x = x, y = luminance))
         geom_vline(xintercept = res$lag, color = "blue") +
         labs(x = "X position (pixels)", y = "Average Luminance", title = paste("Fitted scale: ", detected_pixels, "px"))
 
-      plotreturn = ggarrange(p1,p2, ncol = 1)
+      plotreturn = ggarrange(p0,p1,p2, ncol = 1)
 
       cat(paste("Pixels between scale gradations:", detected_pixels))
       cat("\n")

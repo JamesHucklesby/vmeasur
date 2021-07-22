@@ -91,6 +91,21 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 }
 
 
+#' Title
+#'
+#' @param file_path
+#' @param threshold
+#' @param min_area
+#'
+#' @return
+#' @export
+#'
+#' @examples
+threshold_vessel <- function(file_path, threshold, min_area = 100)
+{
+  threshold_image(file_path, threshold, min_area)
+}
+
 
 #' Threshold a video with pre-determined parameters
 #'
