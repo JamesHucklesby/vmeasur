@@ -12,6 +12,8 @@
 #'
 #' @return the name of a file to be used
 #'
+#' @noRd
+#'
 #' @examples
 #' # filename = make_filename("1", "Test", extension = ".csv")
 #'
@@ -44,7 +46,15 @@ make_filename = function(animal = "NS", treatment = "NS", video = "NS", roi = "N
 #'
 break_filename = function(filename)
 {
-  working_filename = file_path_sans_ext(basename(filename))
+  if(is.data.frame(filename))
+  {
+    working_filename = "[animal_NS][treatment_NS][video_NS][roi_NS]_widths"
+  } else{
+    working_filename = file_path_sans_ext(basename(filename))
+  }
+
+
+
   breakout = str_split(working_filename, "\\]\\[")[[1]]
   breakout = str_replace(breakout, "\\]", "") %>% str_remove("\\[")
   breakout = data.frame(breakout)
@@ -65,6 +75,8 @@ break_filename = function(filename)
 #' @param roi the region of interest selected
 #'
 #' @importFrom utils edit
+#'
+#' @noRd
 #'
 #' @return a list containing the critical filename values collected from the user
 #'

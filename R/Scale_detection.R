@@ -11,10 +11,17 @@
 #' @importFrom  stats acf median
 #' @importFrom  imager draw_text grayscale
 #'
+#' @export
+#'
 #'
 #' @examples
+#' if(interactive()){ # Only run this if the user can intervene to make the
+#' selections
+#'
 #' file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
 #' calibrate_pixel_size(file)
+#'
+#' }
 #'
 calibrate_pixel_size = function(file_path = NULL)
 {

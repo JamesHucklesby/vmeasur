@@ -16,7 +16,12 @@ A graphical representation of
 Calibrate the pixel size using a test image
 }
 \examples{
+if(interactive()){ # Only run this if the user can intervene to make the
+selections
+
 file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
 calibrate_pixel_size(file)
+
+}
 
 }

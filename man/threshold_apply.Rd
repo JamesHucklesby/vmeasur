@@ -13,7 +13,8 @@ threshold_apply(
   ylength = 242,
   xstart = 696,
   ystart = 323,
-  image_list = NULL
+  image_list = NULL,
+  output_folder = NULL
 )
 }
 \arguments{

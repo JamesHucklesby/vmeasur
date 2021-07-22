@@ -7,7 +7,7 @@
 #'
 #' @return The numerical threshold automatically calculated by imager
 #'
-#' @export
+#' @noRd
 #'
 #' @examples
 #' i = 1
@@ -52,7 +52,7 @@ calculate_auto_threshold = function(file_path)
 #'
 #' @return a cropped image
 #'
-#' @export
+#' @noRd
 #'
 #' @examples
 #' # TEST HERE
@@ -75,7 +75,7 @@ crop_dims = function(img, xstart, ystart, xlength, ylength)
 #'
 #' @return an image, with each input arranged in a matrix
 #'
-#' @export
+#' @noRd
 #'
 #' @examples
 #' imagelist = imager::imlist(imager::boats, imager::boats, imager::boats)

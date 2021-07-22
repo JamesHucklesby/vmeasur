@@ -47,7 +47,7 @@ for(i in c(1:nrow(trace_table)))
   #print(paste(j,i))
   filters = trace_table[i,]
   local_data = fulldata_mean_mini %>% filter(site == filters$site, animal == filters$animal, vessel == filters$vessel, treatment == filters$treatment, source_video == filters$source_video, ygroup == filters$ygroup)
-  output = find_peaks(input_vector = local_data$p_mean, min_dist = 30, kband = 30, min_change = 1, nups = 10)
+  output = find_contraction_events(input_vector = local_data$p_mean, min_dist = 30, kband = 30, min_change = 1, nups = 10)
   if(!is.null(output))
   {
     output$id = i

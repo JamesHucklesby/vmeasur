@@ -11,7 +11,7 @@
 #'
 #' @return saves a pdf of a series of quantified folders in the root directory
 #'
-#' @export
+#' @noRd
 #'
 #' @examples
 #' # Used interactivley only
@@ -53,7 +53,7 @@ with_progress({
 #'
 #' @return Saves a PDF file of the analyasis generated
 #'
-#' @export
+#' @noRd
 #'
 #' @importFrom pdftools pdf_combine
 #' @importFrom ggplot2 aes facet_wrap ggsave
@@ -121,7 +121,7 @@ local_data = subset(var2.1, var2.1$trace_id == trace)
 title_data = local_data %>% select(animal, treatment, roi, ygroup) %>% distinct()
 title = paste(paste(colnames(title_data), title_data, sep = "_"), collapse = ",")
 
-peak_data = find_peaks(input_vector = local_data$p_mean, min_dist = 100, kband = kband, min_change = 0.5, nups = 10)
+peak_data = find_contraction_events(input_vector = local_data$p_mean, min_dist = 100, kband = kband, min_change = 0.5, nups = 10)
 
 write.csv(peak_data[2], paste(quant_folder,"\\", title, "_peaks.csv", sep = ""))
 
@@ -180,7 +180,7 @@ unlink(quant_folder)
 #'
 #' @return a ggplot2 heatmap
 #'
-#' @export
+#' @noRd
 #'
 #' @importFrom ggplot2 ggplot geom_raster aes scale_y_reverse scale_x_continuous labs scale_fill_gradient
 #'
@@ -215,11 +215,11 @@ plot_heatmap = function(heatmap_file)
 #'
 #' @return a ggplot2 of the vessel
 #'
-#' @export
-#'
 #' @importFrom dplyr group_by summarise
 #' @importFrom ggplot2 ggplot geom_line aes
 #' @importFrom stats sd
+#'
+#' @noRd
 #'
 #' @examples
 #'
@@ -237,28 +237,13 @@ plot_line = function(widths_file)
 }
 
 
-#' Title
-#'
-#' @param file
-#'
-#' @return
-#' @export
-#'
-#' @examples
-plot_line_ygroup = function(file)
-{
-
-  var1 = import_file_bin(file)
-
-
-
-  return(pc)
-}
 
 
 #' Title
 #'
 #' @param widths_file
+#'
+#' @importFrom ggplot2 coord_flip scale_x_reverse
 #'
 #' @return
 #' @export
@@ -267,11 +252,17 @@ plot_line_ygroup = function(file)
 quantify_width_position = function(widths_file)
 {
 
-  width_data = read.csv(widths_file)
+  if(is.data.frame(widths_file))
+  {
+    width_data = widths_file
+  }else{
+    width_data = read.csv(widths_file)
+  }
+
+
 
   # Fig A
   pa = plot_heatmap(width_data)
-  pa
 
   # Fig B
 
@@ -292,11 +283,15 @@ quantify_width_position = function(widths_file)
 #'
 #' @param widths_file
 #'
+#' @importFrom foreach `%do%`
+#' @importFrom ggplot2 guides guide_colorbar scale_shape_manual geom_errorbar element_rect scale_color_continuous scale_fill_viridis_c
+#' @importFrom dplyr arrange
+#'
 #' @return
 #' @export
 #'
 #' @examples
-quanitfy_mean_width_sections = function(widths_file)
+quantify_mean_width_sections = function(widths_file)
 {
 
   widths_binned = import_file_bin(widths_file, raw = TRUE)

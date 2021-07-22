@@ -19,8 +19,13 @@
 #' @param FPS
 #' @param mean
 #'
+#' @importFrom dplyr arrange mutate group_by summarise
+#' @importFrom tidyr pivot_longer
+#'
+#' @importFrom magrittr `%>%`
+#'
 #' @return
-#' @export
+#' @noRd
 #'
 #' @examples
 calculate_physiological = function(cont, pixel_mm = 73, FPS = 22.8, mean = TRUE)

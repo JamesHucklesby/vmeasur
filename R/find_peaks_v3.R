@@ -12,13 +12,14 @@
 #' @importFrom graphics grid points
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate rowwise cur_group_id
-#' @importFrom ggplot2 aes geom_point
+#' @importFrom ggplot2 aes geom_point scale_color_manual scale_colour_viridis_c
 #'
 #'
 #'
 #' @return A vector of peaks detected
 #'
-#' @export
+#' @noRd
+#'
 #'
 #' @examples
 #' i = 1
@@ -81,12 +82,12 @@ find_contraction_events = function(input_vector, kband = 30, nups = 10, min_chan
   if(isFALSE(plot))
   {
 
-    gg_color_hue <- function(n) {
-      hues = seq(15, 375, length = n + 1)
-      hcl(h = hues, l = 65, c = 100)[1:n]
-    }
+    # gg_color_hue <- function(n) {
+    #   hues = seq(15, 375, length = n + 1)
+    #   hcl(h = hues, l = 65, c = 100)[1:n]
+    # }
 
-    colour_fill = gg_color_hue(5)
+  colour_fill = c("#F8766D" ,"#A3A500" ,"#00BF7D" ,"#00B0F6", "#E76BF3")
 
   function_plot = ggplot() + geom_line(aes(x = (c(1:length(smooth_vector)))/time_scale, y = input_vector/pixel_scale, color = "Raw Data")) +
     geom_line(aes(x = c(1:length(smooth_vector))/time_scale, y = smooth_vector/pixel_scale, color = "Smoothed"), alpha = 0.8) +

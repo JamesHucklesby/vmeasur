@@ -11,7 +11,7 @@
 #' @importFrom readr parse_number
 #'
 #'
-#' @export
+#' @noRd
 #'
 #' @examples
 #' i = 1
@@ -19,7 +19,14 @@
 #'
 import_file = function(filename)
 {
-  csvfile = read.csv(filename)
+  if(is.data.frame(filename))
+  {
+    csvfile = filename
+  }else{
+    csvfile = read.csv(filename)
+  }
+
+
   csvfile$X = NULL
   csvfile$X.1 = NULL
 
@@ -54,6 +61,8 @@ import_file = function(filename)
 #' @importFrom dplyr row_number
 #'
 #' @return A bulk list of imported csv files
+#'
+#' @noRd
 #'
 #' @examples
 #' # Not applicable to CRAN
@@ -105,7 +114,7 @@ import_folder_bin = function(current_dir, y_bin = 30)
 #' @param raw
 #'
 #' @return
-#' @export
+#' @noRd
 #'
 #' @examples
 import_file_bin = function(file_location, y_bin = 30, raw = FALSE)
@@ -144,7 +153,8 @@ import_file_bin = function(file_location, y_bin = 30, raw = FALSE)
 #' @param fulldata_grouped
 #'
 #' @return
-#' @export
+#'
+#' @noRd
 #'
 #' @examples
 summarise_import_file_bin = function(fulldata_grouped, file_location)

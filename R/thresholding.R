@@ -13,8 +13,7 @@
 #' @importFrom magrittr `%>%`
 #' @importFrom purrr discard
 #'
-#' @export
-
+#' @noRd
 #'
 #' @examples
 #' # No examples
@@ -131,6 +130,7 @@ threshold_vessel <- function(file_path, threshold, min_area = 100)
 #' @importFrom magrittr `%>%`
 #' @importFrom imager as.cimg
 #' @importFrom doFuture registerDoFuture
+#' @importFrom tcltk tk_choose.dir
 #'
 #'
 #' @export
@@ -139,11 +139,16 @@ threshold_vessel <- function(file_path, threshold, min_area = 100)
 #'
 #' # test to come
 #'
-threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = 'image826.avi',radians = 0.217604550320612,xlength = 60,ylength = 242,xstart = 696,ystart = 323, image_list = NULL)
+threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = 'image826.avi',radians = 0.217604550320612,xlength = 60,ylength = 242,xstart = 696,ystart = 323, image_list = NULL, output_folder = NULL)
 {
 
 
-directory = scratch_dir()
+  if(is.null(output_folder))
+  {
+    output_folder = tk_choose.dir(caption = "Select Output Folder")
+  }
+
+
 video_folder = dirname(video_path)
 
 video_name = roi_name
@@ -157,7 +162,7 @@ if(!is.null(image_list))
 }
 else
 {
-  temp_path = paste(directory, "/", video_name, sep = "")
+  temp_path = paste(scratch_dir(), "/", video_name, sep = "")
   dir.create(temp_path)
 
   filter_string = paste("rotate = '",radians,":out_w=rotw(",radians,"):out_h=roth(",radians,"):c = red',",
@@ -182,7 +187,7 @@ else
 result <- foreach(i = file_list, .combine = rbind) %dopar%
   {
 
-    processed_image = vmeasur::threshold_image(i, threshold)
+    processed_image = threshold_image(i, threshold)
 
     file_path = i
 
@@ -204,10 +209,10 @@ df.final <- do.call("rbind", ldf)
 
 write.csv(df.final, paste(temp_path, "/widths.csv", sep = ""))
 
-dir.create(paste(video_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", sep = ""))
+dir.create(paste(output_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", sep = ""))
 
-file.copy(paste(temp_path, "/overlaid.avi", sep = ""), paste(video_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/",video_name,"_overlaid.avi", sep = ""))
-file.copy(paste(temp_path, "/widths.csv", sep = ""), paste(video_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", video_name,"_widths.csv", sep = ""))
+file.copy(paste(temp_path, "/overlaid.avi", sep = ""), paste(output_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/",video_name,"_overlaid.avi", sep = ""))
+file.copy(paste(temp_path, "/widths.csv", sep = ""), paste(output_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", video_name,"_widths.csv", sep = ""))
 
 unlink(temp_path, recursive = TRUE)
 
