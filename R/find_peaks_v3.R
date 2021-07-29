@@ -12,7 +12,7 @@
 #' @importFrom graphics grid points
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate rowwise cur_group_id
-#' @importFrom ggplot2 aes geom_point scale_color_manual scale_colour_viridis_c
+#' @importFrom ggplot2 aes geom_point scale_color_manual scale_colour_viridis_c guides guide_legend theme labs
 #'
 #'
 #'
@@ -25,7 +25,7 @@
 #' i = 1
 #' # Test to come
 #'
-find_contraction_events = function(input_vector, kband = 30, nups = 10, min_change = 0.25, min_dist = 10, plot = FALSE, pixel_scale = 73, time_scale = 22.5)
+find_contraction_events = function(input_vector, kband = 20, nups = 10, min_change = 0.25, min_dist = 10, plot = FALSE, pixel_scale = 73, time_scale = 22.5)
 {
 
   smooth_vector = ksmooth(time(1:length(input_vector)), input_vector, 'normal', bandwidth = kband)$y
@@ -81,25 +81,29 @@ find_contraction_events = function(input_vector, kband = 30, nups = 10, min_chan
 
   if(isFALSE(plot))
   {
+#
+#     gg_color_hue <- function(n) {
+#       hues = seq(15, 375, length = n + 1)
+#       hcl(h = hues, l = 65, c = 100)[1:n]
+#     }
+#
+    # "#00B0F6",
 
-    # gg_color_hue <- function(n) {
-    #   hues = seq(15, 375, length = n + 1)
-    #   hcl(h = hues, l = 65, c = 100)[1:n]
-    # }
+  colour_fill = c("grey30", "#C77CFF", "#7CAE00", "#00BFC4", "#F8766D")
 
-  colour_fill = c("#F8766D" ,"#A3A500" ,"#00BF7D" ,"#00B0F6", "#E76BF3")
-
-  function_plot = ggplot() + geom_line(aes(x = (c(1:length(smooth_vector)))/time_scale, y = input_vector/pixel_scale, color = "Raw Data")) +
+  function_plot = ggplot() + geom_line(aes(x = (c(1:length(smooth_vector)))/time_scale, y = input_vector/pixel_scale, color = "Raw data")) +
     geom_line(aes(x = c(1:length(smooth_vector))/time_scale, y = smooth_vector/pixel_scale, color = "Smoothed"), alpha = 0.8) +
     # geom_point(data = raw_events, aes(x = event_start, y = start_value, color = "Event Start")) +
     # geom_point(data = raw_events, aes(x = event_end, y = end_value, color = "Event end")) +
-    geom_point(data = raw_events, aes(x = `event_maxima`/time_scale, y = `max_value`/pixel_scale, color = "Events found and excluded"))+
+    # geom_point(data = raw_events, aes(x = `event_maxima`/time_scale, y = `max_value`/pixel_scale, color = "Events found and excluded"))+
     geom_point(data = events, aes(x = `event_maxima`/time_scale, y = `max_value`/pixel_scale, color = "Event minima"), size = 2) +
-    geom_point(data = events, aes(x = `event_start`/time_scale, y = `start_value`/pixel_scale, color = "Event Start"), size = 4) +
+    geom_point(data = events, aes(x = `event_start`/time_scale, y = `start_value`/pixel_scale, color = "Event start"), size = 4) +
     geom_point(data = events, aes(x = `event_end`/time_scale, y = `end_value`/pixel_scale, color = "Event end"), size = 2) +
-    scale_color_manual(values = c(colour_fill[1:4], "gray30", colour_fill[5]))
+    scale_color_manual(values = c(colour_fill), breaks = c("Raw data", "Smoothed", "Event minima", "Event start", "Event end"))
 
-  function_plot = function_plot + labs(y = "Mean Diameter (mm)", x = "Time (s)", colour = "Tracking property")
+  function_plot = function_plot + guides(color = guide_legend(override.aes = list(linetype = c(1, 1, 0, 0, 0), shape = c(NA, NA, 19, 19, 19) ) ) )
+
+  function_plot = function_plot + labs(y = "Mean Diameter (mm)", x = "Time (s)", colour = "Tracking property") + theme(legend.title.align=0.5)
 
   return(list(function_plot, events))
 
@@ -110,15 +114,27 @@ find_contraction_events = function(input_vector, kband = 30, nups = 10, min_chan
 }
 
 
-#' Title
+#' Quantify the vessel width over an entire ROI
 #'
-#' @param widths_file
-#' @param pixel_scale
+#' This function calculates the overall widths and contraction parameters for the vessel as a whole.
 #'
-#' @return
+#' @param widths_file A CSV file created by select_roi or threshold_vessel
+#' @param pixel_scale The number of pixels per mm, can be calculated with
+#' calibrate_pixel_size if unknown
+#'
+#' @return A list containing:
+#' A graph showing the detected contraction events,
+#' Details of each contraction event,
+#' The mean and standard deviation of the calculated contraction physiological parameters,
+#' The raw data used in the quantification process
+#'
+#'
 #' @export
 #'
 #' @examples
+#'
+#' quantify_mean_width(vmeasur::example_vessel)
+#'
 quantify_mean_width = function(widths_file, pixel_scale = 73)
 {
 

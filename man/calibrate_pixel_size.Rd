@@ -4,20 +4,25 @@
 \alias{calibrate_pixel_size}
 \title{Calibrate the pixel size using a test image}
 \usage{
-calibrate_pixel_size(file_path = NULL)
+calibrate_pixel_size(file_path = tk_file.choose())
 }
 \arguments{
-\item{file_path}{The path to the file}
+\item{file_path}{The path to the image of a ruler to use for calibration. If
+left blank, the user will be prompted to select the file.}
 }
 \value{
-A graphical representation of
+A graphical representation of the ruler and calibration process. The
+number of pixels per mm will also be displayed.
 }
 \description{
-Calibrate the pixel size using a test image
+In order to calculate absolute densities from pixel sizes, the size of the
+field captured by an operating microscope must be determined. This function
+allows the user to select an image of a ruler captured under a microscope,
+before automatically determining the scale.
 }
 \examples{
 if(interactive()){ # Only run this if the user can intervene to make the
-selections
+#selections
 
 file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
 calibrate_pixel_size(file)

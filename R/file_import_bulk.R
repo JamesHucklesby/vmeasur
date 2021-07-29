@@ -107,11 +107,11 @@ import_folder_bin = function(current_dir, y_bin = 30)
 
 
 
-#' Title
+#' Bin and import a csv file
 #'
-#' @param file_location
-#' @param y_bin
-#' @param raw
+#' @param file_location location of the file
+#' @param y_bin bin size
+#' @param raw is the data raw, or should averages be calculated for each bin
 #'
 #' @return
 #' @noRd

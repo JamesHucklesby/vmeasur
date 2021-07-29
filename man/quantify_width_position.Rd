@@ -2,16 +2,24 @@
 % Please edit documentation in R/Bulk_Graphing_V2.R
 \name{quantify_width_position}
 \alias{quantify_width_position}
-\title{Title}
+\title{Quantify the width of a vessel continuously along it's length}
 \usage{
-quantify_width_position(widths_file)
+quantify_width_position(widths_file = tk_file.choose())
 }
 \arguments{
-\item{widths_file}{}
+\item{widths_file}{A csv file created by select_roi or threshold_vessel. The
+user will be prompted to select a file if this is not specified.}
 }
 \value{
-
+Two plots: A heat map of the vessel diameter at each position over
+time and a plot showing the maximum change in diameter over time
 }
 \description{
-Title
+Generate heat maps and line plots showing the changes in vessel diameter along
+it's length
+}
+\examples{
+
+quantify_width_position(vmeasur::example_vessel)
+
 }

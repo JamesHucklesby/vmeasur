@@ -2,16 +2,25 @@
 % Please edit documentation in R/Bulk_Graphing_V2.R
 \name{quantify_mean_width_sections}
 \alias{quantify_mean_width_sections}
-\title{Title}
+\title{Quantify the contractility of a vessel in sections along it's length}
 \usage{
-quantify_mean_width_sections(widths_file)
+quantify_mean_width_sections(widths_file = tk_file.choose())
 }
 \arguments{
-\item{widths_file}{}
+\item{widths_file}{A csv file created by select_roi or threshold_vessel. If
+not specified, the user will be prompted to make a selection.}
 }
 \value{
-
+Graphs showing the contractility over time, contraction position and
+amplitude detected, length of contraction and a heatmap overlay for verification
+of the overall data.
 }
 \description{
-Title
+Quantify the physiological parameters in each section of the vessel along it's
+length.
+}
+\examples{
+
+quantify_mean_width_sections(vmeasur::example_vessel)
+
 }

@@ -90,17 +90,19 @@ threshold_image <- function(file_path, threshold, min_area = 100)
 }
 
 
-#' Title
+#' Apply a threshold to a single frame
 #'
-#' @param file_path
-#' @param threshold
-#' @param min_area
+#' @param file_path path to the file to be used. If left blank, the user will be
+#' prompted to make a selection
+#' @param threshold The threshold to use
+#' @param min_area Minimum area to recognize as a vessel. Any smaller items will
+#' be ignored
 #'
-#' @return
+#' @return a data frame containing the widths of the vessel in each row of the image,
+#' and if any rows were excluded due to overexposure
+#'
 #' @export
-#'
-#' @examples
-threshold_vessel <- function(file_path, threshold, min_area = 100)
+threshold_vessel <- function(file_path = tk_file.choose(), threshold, min_area = 100)
 {
   threshold_image(file_path, threshold, min_area)
 }
@@ -120,6 +122,7 @@ threshold_vessel <- function(file_path, threshold, min_area = 100)
 #' @param xstart ROI starting x co-ordinate
 #' @param ystart ROI starting y co-ordinate
 #' @param image_list If pre-computed, a list of images to use rather than a video
+#' @param output_folder The folder to save the results in, if required
 #'
 #'
 #' @return Saves the quantified CSV and overlaid video in the same directory as the video
@@ -135,9 +138,6 @@ threshold_vessel <- function(file_path, threshold, min_area = 100)
 #'
 #' @export
 #'
-#' @examples
-#'
-#' # test to come
 #'
 threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = 'image826.avi',radians = 0.217604550320612,xlength = 60,ylength = 242,xstart = 696,ystart = 323, image_list = NULL, output_folder = NULL)
 {

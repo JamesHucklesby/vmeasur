@@ -117,12 +117,12 @@ make_matrix = function(output_list, width = 2)
 #' Set the scratch directory for vmeasur
 #'
 #' vmeasur uses av to unpack temporary image files, which are then stored for
-#' further usage. This runs better if done to a high speed storage locaiton such
-#' as a ram drive. This fuction sets that directory.
+#' further usage. This runs better if done to a high speed storage location such
+#' as a ram drive. This function sets that directory.
 #'
 #' If not specified, the default R tempdir is used
 #'
-#' @param set new directory to set
+#' @param set new directory to set. If left blank, no directory change will occur
 #'
 #' @return the current location of the scratch directory
 #'
@@ -131,7 +131,6 @@ make_matrix = function(output_list, width = 2)
 #' @examples
 #' scratch_dir()
 #' scratch_dir("R:")
-#'
 #'
 scratch_dir = function(set = NULL)
 {

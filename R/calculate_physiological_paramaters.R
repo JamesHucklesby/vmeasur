@@ -14,12 +14,12 @@
 
 #' Title
 #'
-#' @param cont
-#' @param pixel_mm
-#' @param FPS
-#' @param mean
+#' @param cont Contraction data
+#' @param pixel_mm Size of each mm in pixels
+#' @param FPS frames per second of video
+#' @param mean should a mean be returned, or the actual results
 #'
-#' @importFrom dplyr arrange mutate group_by summarise
+#' @importFrom dplyr arrange mutate group_by summarize
 #' @importFrom tidyr pivot_longer
 #'
 #' @importFrom magrittr `%>%`

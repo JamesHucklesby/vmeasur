@@ -35,6 +35,8 @@ threshold_apply(
 \item{ystart}{ROI starting y co-ordinate}
 
 \item{image_list}{If pre-computed, a list of images to use rather than a video}
+
+\item{output_folder}{The folder to save the results in, if required}
 }
 \value{
 Saves the quantified CSV and overlaid video in the same directory as the video
@@ -42,9 +44,4 @@ Saves the quantified CSV and overlaid video in the same directory as the video
 \description{
 Using pre-determined values this function generates ROI from a video. If parameters are not known, use select_roi()
 This function is optimized to run in parallel, so should be relatively rapid. If running slowly, check the scratch disk is set correctly.
-}
-\examples{
-
-# test to come
-
 }

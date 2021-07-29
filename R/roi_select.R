@@ -18,8 +18,10 @@
 #'
 #'
 #' @examples
-#' # select_roi()
-#' # Only runs in an interactive session
+#'
+#' if(interactive()){
+#'    select_roi()
+#' }
 #'
 select_roi = function()
 {

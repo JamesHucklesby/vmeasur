@@ -58,7 +58,7 @@ break_filename = function(filename)
   breakout = str_split(working_filename, "\\]\\[")[[1]]
   breakout = str_replace(breakout, "\\]", "") %>% str_remove("\\[")
   breakout = data.frame(breakout)
-  breakout = breakout %>% separate(breakout, c("variable", "value"), sep = "_")
+  breakout = breakout %>% separate(breakout, c("variable", "value"), sep = "_", extra = "drop")
 
   br_list = as.list(breakout$value)
   names(br_list) = breakout$variable

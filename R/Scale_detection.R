@@ -1,8 +1,15 @@
 #' Calibrate the pixel size using a test image
 #'
-#' @param file_path The path to the file
+#' In order to calculate absolute densities from pixel sizes, the size of the
+#' field captured by an operating microscope must be determined. This function
+#' allows the user to select an image of a ruler captured under a microscope,
+#' before automatically determining the scale.
 #'
-#' @return A graphical representation of
+#' @param file_path The path to the image of a ruler to use for calibration. If
+#' left blank, the user will be prompted to select the file.
+#'
+#' @return A graphical representation of the ruler and calibration process. The
+#' number of pixels per mm will also be displayed.
 #'
 #' @importFrom  imager load.image imrotate grabLine grabRect
 #' @importFrom  ggpubr ggarrange
@@ -13,17 +20,16 @@
 #'
 #' @export
 #'
-#'
 #' @examples
 #' if(interactive()){ # Only run this if the user can intervene to make the
-#' selections
+#' #selections
 #'
 #' file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
 #' calibrate_pixel_size(file)
 #'
 #' }
 #'
-calibrate_pixel_size = function(file_path = NULL)
+calibrate_pixel_size = function(file_path = tk_file.choose())
 {
 
 if(is.null(file_path))
@@ -108,4 +114,24 @@ ggplot(grouped) + geom_line(aes(x = x, y = luminance))
 
 
 }
+
+
+
+#' Choose a single file with tcltk
+#'
+#' @param path a path, if not specified
+#'
+#' @return a single filename
+#'
+#' @importFrom tcltk tk_choose.files
+#'
+#' @noRd
+#'
+#' @examples
+#' ##
+tk_file.choose = function(path = tk_choose.files())
+{
+  return(path[[1]])
+}
+
 

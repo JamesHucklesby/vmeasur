@@ -13,7 +13,9 @@ Saves an annotated AVI and CSV file in the same directory as the video. Will als
 This function provides a graphical tool to walk the user through selecting a ROI from an AVI video.
 }
 \examples{
-# select_roi()
-# Only runs in an interactive session
+
+if(interactive()){
+   select_roi()
+}
 
 }

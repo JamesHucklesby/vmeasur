@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of vmeasur is to ...
+The goal of vmeasur is to quantify the contractile nature of vessels monitored under an operating microscope.
 
 ## Installation
 
@@ -34,27 +34,45 @@ And the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("JamesHucklesby/vmeasur")
 ```
-## Example
+## Calibrating the operating microscope
 
-This is a basic example which shows you how to solve a common problem:
+To calibrate an operating microscope, take an image of a gradiated ruler. You can then use
+this function to calculate the number of pixels per mm.
 
-```{r example}
-library(vmeasur)
-## basic example code
+```r 
+calibrate_pixel_size()
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+## Measuring the vessel diameter
 
-```{r cars}
-summary(cars)
+Once video data is collected, the region of interest can be selected using select_roi. This
+provides a wizard that will assist the user through image analysis.
+
+```r
+select_roi()
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/master/examples>.
-
-You can also embed plots, for example:
+Once selected, vmeasur can output a variety of important parameters and graphs
 
 ```{r pressure, echo = FALSE}
-plot(pressure)
+library(vmeasur)
+mean = quantify_mean_width(example_vessel)
+mean[[1]]
+head(mean[[2]])
+head(mean[[3]])
+head(mean[[4]])
+
+width_position = quantify_width_position(example_vessel)
+width_position[[1]]
+width_position[[2]]
+
+mean_sections = quantify_mean_width_sections(example_vessel)
+mean_sections[[1]]
+mean_sections[[2]]
+mean_sections[[3]]
+mean_sections[[4]]
+head(mean_sections[[5]])
+head(mean_sections[[6]])
+
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.

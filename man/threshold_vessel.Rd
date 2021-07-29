@@ -2,16 +2,23 @@
 % Please edit documentation in R/thresholding.R
 \name{threshold_vessel}
 \alias{threshold_vessel}
-\title{Title}
+\title{Apply a threshold to a single frame}
 \usage{
-threshold_vessel(file_path, threshold, min_area = 100)
+threshold_vessel(file_path = tk_file.choose(), threshold, min_area = 100)
 }
 \arguments{
-\item{min_area}{}
+\item{file_path}{path to the file to be used. If left blank, the user will be
+prompted to make a selection}
+
+\item{threshold}{The threshold to use}
+
+\item{min_area}{Minimum area to recognize as a vessel. Any smaller items will
+be ignored}
 }
 \value{
-
+a data frame containing the widths of the vessel in each row of the image,
+and if any rows were excluded due to overexposure
 }
 \description{
-Title
+Apply a threshold to a single frame
 }

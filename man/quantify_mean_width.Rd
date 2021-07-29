@@ -2,16 +2,28 @@
 % Please edit documentation in R/find_peaks_v3.R
 \name{quantify_mean_width}
 \alias{quantify_mean_width}
-\title{Title}
+\title{Quantify the vessel width over an entire ROI}
 \usage{
 quantify_mean_width(widths_file, pixel_scale = 73)
 }
 \arguments{
-\item{pixel_scale}{}
+\item{widths_file}{A CSV file created by select_roi or threshold_vessel}
+
+\item{pixel_scale}{The number of pixels per mm, can be calculated with
+calibrate_pixel_size if unknown}
 }
 \value{
-
+A list containing:
+A graph showing the detected contraction events,
+Details of each contraction event,
+The mean and standard deviation of the calculated contraction physiological parameters,
+The raw data used in the quantification process
 }
 \description{
-Title
+This function calculates the overall widths and contraction parameters for the vessel as a whole.
+}
+\examples{
+
+quantify_mean_width(vmeasur::example_vessel)
+
 }
