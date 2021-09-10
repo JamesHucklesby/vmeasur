@@ -132,7 +132,7 @@ make_matrix = function(output_list, width = 2)
 #' scratch_dir()
 #' scratch_dir("R:")
 #'
-scratch_dir = function(set = NULL)
+scratch_dir = function(set = NULL, random_subfolder = FALSE)
 {
 
   if(!is.null(set))
@@ -142,11 +142,21 @@ scratch_dir = function(set = NULL)
 
   if(is.null(unlist(options("quantifyvessel-scratch_dir"))))
   {
-    return(tempdir())
+    scratch = tempdir()
   }
   else
   {
-    return(options("quantifyvessel-scratch_dir")[[1]])
+    scratch = options("quantifyvessel-scratch_dir")[[1]]
   }
+
+  if(isTRUE(random_subfolder))
+  {
+    runif(1, min = 0, max = 1000)
+    randomstring = hash(runif(1, min = 0, max = 1000))
+    scratch = paste(scratch, randomstring, "/", sep = "")
+    dir.create(scratch)
+  }
+
+  return(scratch)
 }
 
