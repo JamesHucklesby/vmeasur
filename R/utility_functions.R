@@ -126,13 +126,15 @@ make_matrix = function(output_list, width = 2)
 #'
 #' @return the current location of the scratch directory
 #'
+#' @importFrom stringr str_replace_all
+#'
 #' @export
 #'
 #' @examples
 #' scratch_dir()
 #' scratch_dir("R:")
 #'
-scratch_dir = function(set = NULL, random_subfolder = FALSE)
+scratch_dir = function(set = NULL, random_subfolder = FALSE, file_name = FALSE)
 {
 
   if(!is.null(set))
@@ -147,6 +149,14 @@ scratch_dir = function(set = NULL, random_subfolder = FALSE)
   else
   {
     scratch = options("quantifyvessel-scratch_dir")[[1]]
+  }
+
+  if(!isFALSE(file_name))
+  {
+    file_changetime = file.mtime(file_name) %>% str_replace_all(":", " ")
+    file_changetime = paste(basename(file_path_sans_ext(file_name))," ", file_changetime, sep = "")
+    scratch = paste(scratch_dir(), "/", file_changetime, "/", sep = "")
+    dir.create(scratch)
   }
 
   if(isTRUE(random_subfolder))

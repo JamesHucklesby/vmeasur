@@ -4,7 +4,7 @@
 \alias{scratch_dir}
 \title{Set the scratch directory for vmeasur}
 \usage{
-scratch_dir(set = NULL)
+scratch_dir(set = NULL, random_subfolder = FALSE, file_name = FALSE)
 }
 \arguments{
 \item{set}{new directory to set. If left blank, no directory change will occur}

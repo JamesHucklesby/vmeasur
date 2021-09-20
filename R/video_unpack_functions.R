@@ -9,10 +9,7 @@
 unpack_video = function(video_path)
 {
 
-  file_changetime = file.mtime(video_path) %>% str_replace_all(":", " ")
-  file_changetime = paste(basename(file_path_sans_ext(video_path))," ", file_changetime, sep = "")
-
-  scratch = paste(scratch_dir(), "/", file_changetime, "/", sep = "")
+ scratch = scratch_dir(file_name = video_path)
 
   if(!dir.exists(scratch))
   {

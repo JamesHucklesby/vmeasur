@@ -38,6 +38,10 @@
 #' @importFrom imager as.cimg
 #' @importFrom doFuture registerDoFuture
 #' @importFrom tcltk tk_choose.dir
+#' @importFrom dplyr mutate
+#' @importFrom future availableCores
+#' @importFrom stringr str_replace
+#'
 #'
 #'
 #' @export
