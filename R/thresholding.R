@@ -25,7 +25,7 @@ threshold_image <- function(file_path, threshold, min_area = 100)
   im <- imager::load.image(file_path)
   im.c = imager::imsplit(im,"c")[[1]]
 
-  plot(im.c)
+  # plot(im.c)
 
   # Histogram plot if needed for debugging
   #hist(as.data.frame(im.c)$value)
@@ -143,10 +143,12 @@ threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = 'ima
 {
 
 
-  if(is.null(output_folder))
-  {
-    output_folder = tk_choose.dir(caption = "Select Output Folder")
-  }
+  # if(is.null(output_folder))
+  # {
+  #   output_folder = choose.dir(caption = "Select Output Folder")
+  # }
+
+output_folder = dirname(video_path)
 
 
 video_folder = dirname(video_path)
@@ -171,10 +173,17 @@ else
 
   av::av_encode_video(video_path, paste(temp_path, "/%03d.png", sep = ""), vfilter = filter_string, codec = "png")
 
-
   file_list = list.files(temp_path, full.names = TRUE, pattern = "\\.png$")
 }
 
+crop_file_list = file_list
+av::av_encode_video(crop_file_list, output = paste(temp_path, "/crop.avi", sep = ""),codec = "libx264", verbose = 24)
+file.copy(paste(temp_path, "/crop.avi", sep = ""), paste(output_folder,"/", basename(file_path_sans_ext(video_path)),"_",video_name,"_cropped.avi", sep = ""))
+
+
+## REMOVE THIS LATER
+unlink(temp_path, recursive = TRUE)
+return(TRUE)
 
 
 
@@ -203,16 +212,18 @@ result <- foreach(i = file_list, .combine = rbind) %dopar%
 file_list = list.files(temp_path, full.names = TRUE, pattern = "\\overlaid.png$")
 av::av_encode_video(file_list, output = paste(temp_path, "/overlaid.avi", sep = ""),codec = "libx264", verbose = 24)
 
+
 file_list = list.files(temp_path, full.names = TRUE, pattern = "\\overlaid.csv$")
 ldf <- lapply(file_list , read.csv)
 df.final <- do.call("rbind", ldf)
 
 write.csv(df.final, paste(temp_path, "/widths.csv", sep = ""))
 
-dir.create(paste(output_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", sep = ""))
+# dir.create(paste(output_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", sep = ""))
 
-file.copy(paste(temp_path, "/overlaid.avi", sep = ""), paste(output_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/",video_name,"_overlaid.avi", sep = ""))
-file.copy(paste(temp_path, "/widths.csv", sep = ""), paste(output_folder,"/", basename(file_path_sans_ext(video_path)), "_processing/", video_name,"_widths.csv", sep = ""))
+file.copy(paste(temp_path, "/widths.csv", sep = ""), paste(output_folder,"/", basename(file_path_sans_ext(video_path)),"_", video_name,"_widths.csv", sep = ""))
+
+file.copy(paste(temp_path, "/overlaid.avi", sep = ""), paste(output_folder,"/", basename(file_path_sans_ext(video_path)),"_",video_name,"_overlaid.avi", sep = ""))
 
 unlink(temp_path, recursive = TRUE)
 
