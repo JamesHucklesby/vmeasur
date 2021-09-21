@@ -119,6 +119,8 @@ output_folder = dirname(video_path)
     }
   }
 
+  message("Copying results")
+
 
   output_file_base = paste(output_folder, "/", basename(file_path_sans_ext(video_path)), "_", roi_name, "_", sep = "")
 
