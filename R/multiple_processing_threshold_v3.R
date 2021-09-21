@@ -82,7 +82,6 @@ output_folder = dirname(video_path)
 
   starttime = Sys.time()
 
-  registerDoFuture()
 
   options(future.rng.onMisuse = "ignore")
 
@@ -94,13 +93,13 @@ output_folder = dirname(video_path)
 
   split_file_list = split(cropped_file_list, ceiling(seq_along(cropped_file_list)/bundlesize))
 
-  if(length(cropped_file_list>20))
-  {
-  plan("multisession", .skip = TRUE)
-  }else
-  {
-    plan("sequential")
-  }
+  # if(length(cropped_file_list>20))
+  # {
+  # plan("multisession", .skip = TRUE)
+  # }else
+  # {
+  #   plan("sequential")
+  # }
 
   foreach(locallist = split_file_list) %dopar%
   {

@@ -115,6 +115,10 @@ threshold_vessel <- function(file_path = tk_file.choose(), threshold, min_area =
 #' @return
 #' @export
 #'
+#' @importFrom imager R
+#' @importFrom tools file_path_sans_ext
+#' @importFrom dplyr group_by mutate summarise ungroup
+#'
 #' @examples
 image_intensity_spread = function(image_test)
 {
