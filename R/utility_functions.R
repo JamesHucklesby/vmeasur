@@ -134,7 +134,7 @@ make_matrix = function(output_list, width = 2)
 #' scratch_dir()
 #' scratch_dir("R:")
 #'
-scratch_dir = function(set = NULL, random_subfolder = FALSE, file_name = FALSE)
+scratch_dir = function(set = NULL, random_subfolder = FALSE, file_name = FALSE, wipe_scratch = FALSE)
 {
 
   if(!is.null(set))
@@ -169,6 +169,12 @@ scratch_dir = function(set = NULL, random_subfolder = FALSE, file_name = FALSE)
     randomstring = hash(runif(1, min = 0, max = 1000))
     scratch = paste(scratch, randomstring, "/", sep = "")
     dir.create(scratch)
+  }
+
+  if(isTRUE(wipe_scratch))
+  {
+    directory_list = list.dirs(options("quantifyvessel-scratch_dir")[[1]])
+    unlink(directory_list, recursive = TRUE, force = TRUE)
   }
 
   return(scratch)

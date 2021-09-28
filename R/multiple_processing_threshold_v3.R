@@ -57,6 +57,8 @@ output_folder = dirname(video_path)
 
 # Crop video and save output
 
+  scratch_dir(wipe_scratch = TRUE)
+
   scratch = scratch_dir(file_name = video_path)
 
   unlink(gsub("/$", "", scratch), recursive = TRUE, force = TRUE)
