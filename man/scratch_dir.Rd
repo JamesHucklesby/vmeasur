@@ -4,10 +4,21 @@
 \alias{scratch_dir}
 \title{Set the scratch directory for vmeasur}
 \usage{
-scratch_dir(set = NULL, random_subfolder = FALSE, file_name = FALSE)
+scratch_dir(
+  set = NULL,
+  random_subfolder = FALSE,
+  file_name = FALSE,
+  wipe_scratch = FALSE
+)
 }
 \arguments{
 \item{set}{new directory to set. If left blank, no directory change will occur}
+
+\item{random_subfolder}{Should a random sub folder be created}
+
+\item{file_name}{Specify the name of the directory}
+
+\item{wipe_scratch}{Should the folder be cleared before use}
 }
 \value{
 the current location of the scratch directory
@@ -15,7 +26,8 @@ the current location of the scratch directory
 \description{
 vmeasur uses av to unpack temporary image files, which are then stored for
 further usage. This runs better if done to a high speed storage location such
-as a ram drive. This function sets that directory.
+as a ram drive. This function sets that directory, and provides other options
+for specifying the structure of this temporary data.
 }
 \details{
 If not specified, the default R tempdir is used

@@ -26,7 +26,7 @@
 #' @param xstart ROI starting x co-ordinate
 #' @param ystart ROI starting y co-ordinate
 #' @param image_list If pre-computed, a list of images to use rather than a video
-#' @param output_folder The folder to save the results in, if required
+#' @param fps Number of fps to process, this can be set lower for validation
 #'
 #'
 #' @return Saves the quantified CSV and overlaid video in the same directory as the video
@@ -53,7 +53,7 @@ threshold_apply = function(threshold = 0.5, roi_name = "test", video_path = 'ima
 
   #Make a full processing run in RAM
 
-output_folder = dirname(video_path)
+ output_folder = output_dir(dirname(video_path), use_default = TRUE)
 
 # Crop video and save output
 

@@ -19,7 +19,7 @@
 #'
 #' @examples
 #'
-#' if(interactive()){
+#' \dontrun{
 #'    select_roi()
 #' }
 #'

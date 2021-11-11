@@ -21,8 +21,7 @@
 #' @export
 #'
 #' @examples
-#' if(interactive()){ # Only run this if the user can intervene to make the
-#' #selections
+#' \dontrun{
 #'
 #' file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
 #' calibrate_pixel_size(file)

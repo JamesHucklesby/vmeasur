@@ -36,7 +36,7 @@ threshold_apply(
 
 \item{image_list}{If pre-computed, a list of images to use rather than a video}
 
-\item{output_folder}{The folder to save the results in, if required}
+\item{fps}{Number of fps to process, this can be set lower for validation}
 }
 \value{
 Saves the quantified CSV and overlaid video in the same directory as the video

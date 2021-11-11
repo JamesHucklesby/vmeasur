@@ -40,9 +40,19 @@ find_contraction_events = function(input_vector, kband = 20, nups = 10, min_chan
   #
   # return(x)
 
+  colour_fill = c("grey30", "#C77CFF", "#7CAE00", "#00BFC4", "#F8766D")
+
+  blankdata = data.frame(x = c(1:length(input_vector)), y = input_vector)
+  blankgraphdata = ggplot() + geom_line(data = blankdata, aes(x = x/time_scale, y = y/pixel_scale, color = "No contractions found")) +
+    labs(y = "Mean Diameter (mm)", x = "Time (s)", colour = "Tracking property") + theme(legend.title.align=0.5)
+
+  blankgraph = list()
+  blankgraph[[1]] = blankgraphdata
+  blankgraph[2] = NA
+
   if(!isTRUE(nrow(x)>1))
   {
-    return(NULL)
+    return(blankgraph)
   }
 
 
@@ -52,7 +62,7 @@ find_contraction_events = function(input_vector, kband = 20, nups = 10, min_chan
     events = data.frame(event_maxima = x[,2], event_start = x[,3],event_end = x[,4],type = "contract")
   }else
   {
-    return(NULL)
+    return(blankgraph)
   }
 
   events$start_value = smooth_vector[events$event_start]
@@ -75,12 +85,10 @@ find_contraction_events = function(input_vector, kband = 20, nups = 10, min_chan
 
   if(nrow(events) ==0)
   {
-    return(NULL)
+    return(blankgraph)
   }
 
 
-  if(isFALSE(plot))
-  {
 #
 #     gg_color_hue <- function(n) {
 #       hues = seq(15, 375, length = n + 1)
@@ -89,7 +97,6 @@ find_contraction_events = function(input_vector, kband = 20, nups = 10, min_chan
 #
     # "#00B0F6",
 
-  colour_fill = c("grey30", "#C77CFF", "#7CAE00", "#00BFC4", "#F8766D")
 
   function_plot = ggplot() + geom_line(aes(x = (c(1:length(smooth_vector)))/time_scale, y = input_vector/pixel_scale, color = "Raw data")) +
     geom_line(aes(x = c(1:length(smooth_vector))/time_scale, y = smooth_vector/pixel_scale, color = "Smoothed"), alpha = 0.8) +
@@ -107,10 +114,6 @@ find_contraction_events = function(input_vector, kband = 20, nups = 10, min_chan
 
   return(list(function_plot, events))
 
-  }
-
-
-  return(events)
 }
 
 

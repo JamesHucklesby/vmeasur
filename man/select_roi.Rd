@@ -14,7 +14,7 @@ This function provides a graphical tool to walk the user through selecting a ROI
 }
 \examples{
 
-if(interactive()){
+\dontrun{
    select_roi()
 }
 

@@ -30,21 +30,27 @@ import_file = function(filename)
   csvfile$X = NULL
   csvfile$X.1 = NULL
 
+  file_source = basename(file_path_sans_ext(filename)) %>% str_split("_")
+
+  video = file_source[[1]][[1]]
+  treatment = (file_source[[1]][[2]] %>% str_split("S"))[[1]][[1]] %>% str_replace_all("[:digit:]","")
+  animal = (file_source[[1]][[2]] %>% str_split("S"))[[1]][[1]] %>% str_replace_all("[A-Za-z]","")
+  field = (file_source[[1]][[2]] %>% str_to_upper() %>% str_split("S"))[[1]][[2]]
+  vessel = file_source[[1]][[3]]
+
+
   # csvfile %>% select(y, excluded) %>% distinct()
   # toexclude = csvfile %>% group_by(y) %>% summarise(excluded = sum(excluded==1))
 
-  csvfile = csvfile %>% group_by(`y`) %>%
-    mutate(excluded = sum(excluded)>1) %>%
+  csvfile = csvfile %>% group_by(`y_position`) %>%
+    mutate(y_position_excluded= sum(y_position_excluded)>1) %>%
     ungroup() %>%
-    mutate(p_width = ifelse(!`excluded`, `p_width`, NA))
+    mutate(p_width = ifelse(!`y_position_excluded`, `p_width`, NA)) %>%
+    mutate(video = video, treatment = treatment, animal = animal, field = field, vessel = vessel, roi = roi_name, y = y_position)
 
-  file_variables = break_filename(filename)
 
-  csvfile$animal = file_variables[["animal"]]
-  csvfile$treatment = file_variables[["treatment"]]
-  csvfile$video = file_variables[["video"]]
-  csvfile$roi = file_variables[["roi"]]
-  csvfile$filename = as.character(csvfile$filename)
+
+
 
   return(csvfile)
 
@@ -71,15 +77,20 @@ import_folder_bin = function(current_dir, y_bin = 30)
 {
 
   # list out the CSV files to import
-  folder_files = list.files(current_dir, recursive = TRUE, pattern = "\\_widths.csv$", full.names = TRUE)
+  folder_files = list.files(current_dir, recursive = TRUE, pattern = "width.csv$", full.names = TRUE)
 
   if(length(folder_files)==1)
   {
     fulldata = import_file(folder_files)
-  }
-  else{
+  } else{
+
   # Import them all with lapply and combine with dplyr
-  applied = lapply(folder_files, import_file)
+
+    applied = foreach(currentfile = folder_files) %do%
+        {
+       import_file(currentfile)
+       }
+
   fulldata = dplyr::bind_rows(applied, .id = "file_id")
   }
 
@@ -95,7 +106,7 @@ import_folder_bin = function(current_dir, y_bin = 30)
     filter(npix == pixel_bin) %>%
     ungroup()
 
-  fulldata_mean = fulldata_grouped %>% filter(!excluded) %>%
+  fulldata_mean = fulldata_grouped %>% filter(!y_position_excluded) %>% ungroup() %>%
     group_by(`frame_id`, `video`, `animal`, `treatment`, `roi`, `ygroup`) %>%
     summarise(p_mean = mean(p_width, na.rm = TRUE), p_median = median(p_width, na.rm = TRUE)) %>%
     group_by(`animal`, `treatment`, `roi`, `ygroup`) %>%
@@ -120,7 +131,12 @@ import_folder_bin = function(current_dir, y_bin = 30)
 import_file_bin = function(file_location, y_bin = 30, raw = FALSE)
 {
 
-    fulldata = import_file(file_location)
+  if(is.data.frame(file_location)) {
+    fulldata = file_location
+  } else
+  {
+  fulldata = import_file(file_location)
+  }
 
 
   fulldata = fulldata %>% group_by(y, roi, animal, treatment, video) %>%
@@ -159,7 +175,7 @@ import_file_bin = function(file_location, y_bin = 30, raw = FALSE)
 #' @examples
 summarise_import_file_bin = function(fulldata_grouped, file_location)
 {
-  toreturn = fulldata_grouped %>% filter(!excluded) %>%
+  toreturn = fulldata_grouped %>% filter(!y_position_excluded) %>%
     group_by(`frame_id`, `video`, `animal`, `treatment`, `roi`, `ygroup`) %>%
     summarise(p_mean = mean(p_width, na.rm = TRUE), p_median = median(p_width, na.rm = TRUE)) %>%
     group_by(`animal`, `treatment`, `roi`, `ygroup`) %>%

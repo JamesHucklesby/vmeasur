@@ -5,7 +5,9 @@ globalVariables(c("end_value" ,"event_change" ,"event_duration" ,"event_end" ,"e
 luminance", "max_range", "max_value", "maxcont", "npix", "opts", "p_mean", "previous",
 "reading", "site", "source_video", "trace_id", "treatment", "vessel", "x", "ygroup", "lagz", "luminance",
 "filename", "mean_diameter", "roi", "video", "CA" ,"CD", "EDD" ,"EDD2", "EF", "ESD", "FD", "bin", "cont_id", "event_id",
-"source_file" ,"variable" ,"xintercept"))
+"source_file" ,"variable" ,"xintercept",    "cont_group_id" ,"current_csv" ,"current_tree", "currentfile", "locallist",
+"mean_width" ,"nvideo" ,"remaining" ,"roi_name" ,"segment" ,"tree" ,"y_group" ,"y_group_pos",
+"y_position" ,"y_position_excluded"))
 
 
 #' Example lymphatic width dataset

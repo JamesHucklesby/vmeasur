@@ -114,15 +114,66 @@ make_matrix = function(output_list, width = 2)
 }
 
 
+
+#' Set the output directory
+#'
+#' @param set The directory to set to
+#' @param use_default Should the default value be used, or the system value
+#' @param set_default Should the system value be updated
+#'
+#' @return The file path to export to
+#'
+#' @export
+output_dir = function(set = NULL, use_default = FALSE, set_default = FALSE)
+{
+
+  if(isTRUE(set_default))
+  {
+    options("quantifyvessel-output_dir" = use_default)
+  }
+
+  if(isTRUE(use_default) && isTRUE(unlist(options("quantifyvessel-output_dir"))))
+  {
+    return(set)
+  }
+
+  if(!is.null(set))
+  {
+    options("quantifyvessel-scratch_dir"= set)
+  }
+
+  if(is.null(unlist(options("quantifyvessel-scratch_dir"))))
+  {
+    scratch = tempdir()
+  }
+  else
+  {
+    scratch = options("quantifyvessel-scratch_dir")[[1]]
+  }
+
+  if(scratch == tempdir())
+  {
+    print("Outputting to temporary directory")
+  }
+
+  return(scratch)
+
+}
+
+
 #' Set the scratch directory for vmeasur
 #'
 #' vmeasur uses av to unpack temporary image files, which are then stored for
 #' further usage. This runs better if done to a high speed storage location such
-#' as a ram drive. This function sets that directory.
+#' as a ram drive. This function sets that directory, and provides other options
+#' for specifying the structure of this temporary data.
 #'
 #' If not specified, the default R tempdir is used
 #'
 #' @param set new directory to set. If left blank, no directory change will occur
+#' @param random_subfolder Should a random sub folder be created
+#' @param file_name Specify the name of the directory
+#' @param wipe_scratch Should the folder be cleared before use
 #'
 #' @return the current location of the scratch directory
 #'

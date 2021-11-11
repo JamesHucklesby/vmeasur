@@ -21,8 +21,7 @@ allows the user to select an image of a ruler captured under a microscope,
 before automatically determining the scale.
 }
 \examples{
-if(interactive()){ # Only run this if the user can intervene to make the
-#selections
+\dontrun{
 
 file = paste(system.file(package = "vmeasur"), "extdata/mm_scale.jpg", sep = "/")
 calibrate_pixel_size(file)

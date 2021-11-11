@@ -65,20 +65,24 @@ with_progress({
 #' @examples
 #' # Select a folder and it will be quantified
 #'
+#' folder = choose.dir()
 #'
 quantify_folder = function(folder, kband = 40)
 {
 
 
   var1 = import_folder_bin(folder)
+  var1.1 = var1 %>% group_by(frame_id, video, animal, treatment, roi, ygroup, trace_id) %>% summarise(n = n())
 
-  var2 = var1 %>% group_by(trace_id) %>% mutate(max_range = max(p_mean)-min(p_mean)) %>%
+  var2 = var1.1 %>% group_by(trace_id) %>% mutate(max_range = max(p_mean)-min(p_mean)) %>%
     group_by(roi) %>% mutate(maxcont = max_range == max(max_range))
 
   # Plot out that data
-  ggplot(var2) + geom_line(aes(x = frame_id, y = p_mean, color = as.factor(maxcont), group = ygroup)) + facet_wrap(~ roi)
+  ggplot(var2) + geom_line(aes(x = frame_id, y = p_mean, color = as.factor(ygroup), group = ygroup)) + facet_wrap(~ roi)
 
-
+  # roi1 = var2 %>% filter(roi == "AP19S1.1_1.1") %>% filter(trace_id == 1)
+  # roi1 = roi1 %>% group_by(trace_id, frame_id) %>% summarise(p_mean = mean(p_mean))
+  # ggplot(roi1) + geom_line(aes(x = frame_id, y = p_mean, color = trace_id))
 
   var2.1 = var2
 
@@ -87,17 +91,17 @@ quantify_folder = function(folder, kband = 40)
   quant_folder = paste(scratch_dir(), "\\", hash(paste(folder, Sys.time())), sep = "")
   dir.create(quant_folder)
 
-  folder_files = list.files(folder, recursive = TRUE, pattern = "\\_widths.csv$", full.names = TRUE)
+  folder_files = list.files(folder, recursive = TRUE, pattern = "\\_ width.csv$", full.names = TRUE)
 
-  for(one_region in folder_files)
-  {
-    heat_plot = plot_heatmap(one_region)
-
-    overall_plot_heat_file = paste(quant_folder, "\\",animal_trt, file_path_sans_ext(basename(one_region)), "_heatmap.pdf", sep = "")
-
-    ggsave(overall_plot_heat_file, heat_plot, width = 297, height = 210, units = "mm")
-
-  }
+  # for(one_region in folder_files)
+  # {
+  #   heat_plot = plot_heatmap(one_region)
+  #
+  #   overall_plot_heat_file = paste(quant_folder, "\\",animal_trt, file_path_sans_ext(basename(one_region)), "_heatmap.pdf", sep = "")
+  #
+  #   ggsave(overall_plot_heat_file, heat_plot, width = 297, height = 210, units = "mm")
+  #
+  # }
 
 
 
@@ -152,10 +156,13 @@ folder_files = list.files(quant_folder, recursive = TRUE, pattern = "\\_peaks.cs
 
 import_csv_with_source = function(csv_file)
 {
+  try({
   dataframe = read.csv(csv_file)
   dataframe$source_file = file_path_sans_ext(basename(csv_file))
   dataframe$X1 = NULL
   return(dataframe)
+  })
+  return(NULL)
 }
 
 
@@ -316,7 +323,7 @@ quantify_width_position = function(widths_file = tk_file.choose())
 #'
 #' @examples
 #'
-#' quantify_mean_width_sections(vmeasur::example_vessel)
+#' # quantify_mean_width_sections(widths_file = vmeasur::example_vessel)
 #'
 quantify_mean_width_sections = function(widths_file = tk_file.choose())
 {

@@ -21,6 +21,6 @@ length.
 }
 \examples{
 
-quantify_mean_width_sections(vmeasur::example_vessel)
+# quantify_mean_width_sections(widths_file = vmeasur::example_vessel)
 
 }
